@@ -500,10 +500,6 @@ namespace node {
     dof_hdr_t *dof;
     dof = (dof_hdr_t *) this->dof;
 
-    fd = open("/tmp/dof", O_RDWR | O_TRUNC);
-    write(fd, this->dof, this->size);
-    close(fd);
-  
     dh.dofhp_dof  = (uintptr_t)dof;
     dh.dofhp_addr = (uintptr_t)dof;
     (void) snprintf(dh.dofhp_mod, sizeof (dh.dofhp_mod), "module");
