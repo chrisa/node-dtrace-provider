@@ -19,14 +19,14 @@ root.
 
 Here's a simple example of creating a provider:
 
-  var d = require('dtrace-provider');
+    var d = require('dtrace-provider');
 
-  var dtp = d.createDTraceProvider("nodeapp");
-  dtp.addProbe("probe1", "int", "int");
-  dtp.addProbe("probe2", "char *");
-  dtp.enable();
-  dtp.fire("probe1", function(p) { return [1, 2]; });
-  dtp.fire("probe2", function(p) { return ["hello, dtrace"]; });
+    var dtp = d.createDTraceProvider("nodeapp");
+    dtp.addProbe("probe1", "int", "int");
+    dtp.addProbe("probe2", "char *");
+    dtp.enable();
+    dtp.fire("probe1", function(p) { return [1, 2]; });
+    dtp.fire("probe2", function(p) { return ["hello, dtrace"]; });
 
 This example creates a provider called "nodeapp", and adds two
 probes. It then enables the provider, at which point the provider
@@ -34,13 +34,13 @@ becomes visible to DTrace.
 
 The probes are then fired, which produces this output:
 
-  $ sudo dtrace -Z -n 'nodeapp*:::probe1{ trace(arg0); trace(arg1) }'  \
-                   -n 'nodeapp*:::probe2{ trace(copyinstr(arg0));  }'
-  dtrace: description 'nodeapp*:::probe1' matched 0 probes
-  dtrace: description 'nodeapp*:::probe2' matched 0 probes
-  CPU     ID                    FUNCTION:NAME
-    1 123562                      func:probe1                 1                2
-    1 123563                      func:probe2   hello, dtrace                    
+    $ sudo dtrace -Z -n 'nodeapp*:::probe1{ trace(arg0); trace(arg1) }'  \
+                     -n 'nodeapp*:::probe2{ trace(copyinstr(arg0));  }'
+    dtrace: description 'nodeapp*:::probe1' matched 0 probes
+    dtrace: description 'nodeapp*:::probe2' matched 0 probes
+    CPU     ID                    FUNCTION:NAME
+      1 123562                      func:probe1                 1                2
+      1 123563                      func:probe2   hello, dtrace                    
 
 ## PLATFORM SUPPORT
 
@@ -64,6 +64,6 @@ firing a probe should not.
 
 Performance is not where it should be, most especially the
 disabled-probe effect. Probes are already using the "is-enabled"
-feature of DTrace, but too much work needs to be done to get
-there. Improving this may imply changes to the API shown in the
+feature of DTrace, but too much work needs to be done before that's
+checked. Improving this may imply changes to the API shown in the
 example above.
