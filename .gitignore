@@ -1,0 +1,6 @@
+.lock-wscript
+*.node
+*~
+.#*
+*#
+build
