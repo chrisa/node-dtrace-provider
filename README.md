@@ -15,6 +15,10 @@ runtime. This is done entirely in-process, and there is no background
 compiler invocation. The process creating the provider need not run as
 root.
 
+## INSTALL
+
+    $ npm install dtrace-provider
+
 ## EXAMPLE
 
 Here's a simple example of creating a provider:
