@@ -74,10 +74,21 @@ namespace node {
     return Undefined();
   }
 
-  #define FUNC_SIZE 32
-
   static void *create_probe(int argc) {
-    uint8_t insns[FUNC_SIZE] = {
+    
+#ifdef __APPLE__	
+#define FUNC_SIZE 32
+#define IS_ENABLED_FUNC_LEN 12
+#else
+#define FUNC_SIZE 96
+#define IS_ENABLED_FUNC_LEN 32
+#endif
+    
+#ifdef __APPLE__
+    void *p = (void *) valloc(FUNC_SIZE);
+    (void)mprotect((void *)p, FUNC_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC);
+
+    uint8_t tracepoints[FUNC_SIZE] = {
       0x55, 0x48, 0x89, 0xe5, 
       0x48, 0x33, 0xc0, 0x90, 
       0x90, 0xc9, 0xc3, 0x00,
@@ -87,10 +98,122 @@ namespace node {
       0x1f, 0x44, 0x00, 0x00,
       0x00, 0x00, 0x00, 0x00
     };
-	
-    void *p = (void *) valloc(FUNC_SIZE);
+
+    memcpy(p, tracepoints, FUNC_SIZE);
+
+#else // Solaris 32 bit
+
+    void *p = (void *) memalign(PAGESIZE, FUNC_SIZE);
     (void)mprotect((void *)p, FUNC_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC);
-    memcpy(p, insns, FUNC_SIZE);
+
+    uint8_t is_enabled[FUNC_SIZE] = {
+      0x55, 0x89, 0xe5, 0x83,
+      0xec, 0x08, 0x33, 0xc0,
+      0x90, 0x90, 0x90, 0x89,
+      0x45, 0xfc, 0x83, 0x7d,
+      0xfc, 0x00, 0x0f, 0x95,
+      0xc0, 0x0f, 0xb6, 0xc0,
+      0x89, 0x45, 0xfc, 0x8b,
+      0x45, 0xfc, 0xc9, 0xc3,
+    };
+    memcpy(p, is_enabled, FUNC_SIZE);
+    
+    switch(argc) {
+    case 0:
+      {
+	uint8_t probe[FUNC_SIZE] = {
+	  0x55, 0x89, 0xe5, 0x83,
+	  0xec, 0x08, 0x90, 0x90,
+	  0x90, 0x90, 0x90, 0x83,
+	  0xc4, 0x00, 0xc9, 0xc3
+	};
+	memcpy((uint8_t *)p + 32, probe, FUNC_SIZE - 32);
+      }
+      break;
+    case 1:
+      {
+	uint8_t probe[FUNC_SIZE] = {
+	  0x55, 0x89, 0xe5, 0x83,
+	  0xec, 0x08, 0xff, 0x75,
+	  0x08, 0x90, 0x90, 0x90,
+	  0x90, 0x90, 0x83, 0xc4,
+	  0x00, 0xc9, 0xc3
+	};
+	memcpy((uint8_t *)p + 32, probe, FUNC_SIZE - 32);
+      }
+      break;
+    case 2:
+      {
+	uint8_t probe[FUNC_SIZE] = {
+	  0x55, 0x89, 0xe5, 0x83,
+	  0xec, 0x08, 0xff, 0x75,
+	  0x0c, 0xff, 0x75, 0x08,
+	  0x90, 0x90, 0x90, 0x90,
+	  0x90, 0x83, 0xc4, 0x00,
+	  0xc9, 0xc3
+	};
+	memcpy((uint8_t *)p + 32, probe, FUNC_SIZE - 32);
+      }
+      break;
+    case 3:
+      {
+	uint8_t probe[FUNC_SIZE] = {
+	  0x55, 0x89, 0xe5, 0x83,
+	  0xec, 0x08, 0xff, 0x75,
+	  0x10, 0xff, 0x75, 0x0c,
+	  0xff, 0x75, 0x08, 0x90,
+	  0x90, 0x90, 0x90, 0x90,
+	  0x83, 0xc4, 0x00, 0xc9,
+	  0xc3
+	};
+	memcpy((uint8_t *)p + 32, probe, FUNC_SIZE - 32);
+      }
+      break;
+    case 4:
+      {
+	uint8_t probe[FUNC_SIZE] = {
+	  0x55, 0x89, 0xe5, 0x83,
+	  0xec, 0x08, 0xff, 0x75,
+	  0x14, 0xff, 0x75, 0x10,
+	  0xff, 0x75, 0x0c, 0xff, 
+	  0x75, 0x08, 0x90, 0x90,
+	  0x90, 0x90, 0x90, 0x83,
+	  0xc4, 0x00, 0xc9, 0xc3
+	};
+	memcpy((uint8_t *)p + 32, probe, FUNC_SIZE - 32);
+      }
+    case 5:
+      {
+	uint8_t probe[FUNC_SIZE] = {
+	  0x55, 0x89, 0xe5, 0x83,
+	  0xec, 0x08, 0xff, 0x75,
+	  0x18, 0xff, 0x75, 0x14,
+	  0xff, 0x75, 0x10, 0xff,
+	  0x75, 0x0c, 0xff, 0x75,
+	  0x08, 0x90, 0x90, 0x90,
+	  0x90, 0x90, 0x83, 0xc4,
+	  0x00, 0xc9, 0xc3
+	};
+	memcpy((uint8_t *)p + 32, probe, FUNC_SIZE - 32);
+      }
+    case 6:
+      {
+	uint8_t probe[FUNC_SIZE] = {
+	  0x55, 0x89, 0xe5, 0x83,
+	  0xec, 0x08, 0xff, 0x75,
+	  0x1c, 0xff, 0x75, 0x18,
+	  0xff, 0x75, 0x14, 0xff,
+	  0x75, 0x10, 0xff, 0x75,
+	  0x0c, 0xff, 0x75, 0x08,
+	  0x90, 0x90, 0x90, 0x90,
+	  0x90, 0x83, 0xc4, 0x00,
+	  0xc9, 0xc3
+	};
+	memcpy((uint8_t *)p + 32, probe, FUNC_SIZE - 32);
+      }
+      break;
+    }
+#endif
 
     return p;
   }
@@ -276,31 +399,31 @@ namespace node {
 
     switch (pd->Argc()) {
     case 0:
-      func0 = (void (*)())((uint64_t)p->addr + 12); 
+      func0 = (void (*)())((uint64_t)p->addr + IS_ENABLED_FUNC_LEN); 
       (void)(*func0)();
       break;
     case 1:
-      func1 = (void (*)(void *))((uint64_t)p->addr + 12); 
+      func1 = (void (*)(void *))((uint64_t)p->addr + IS_ENABLED_FUNC_LEN); 
       (void)(*func1)(argv[0]);
       break;
     case 2:
-      func2 = (void (*)(void *, void *))((uint64_t)p->addr + 12); 
+      func2 = (void (*)(void *, void *))((uint64_t)p->addr + IS_ENABLED_FUNC_LEN); 
       (void)(*func2)(argv[0], argv[1]);
       break;
     case 3:
-      func3 = (void (*)(void *, void *, void *))((uint64_t)p->addr + 12); 
+      func3 = (void (*)(void *, void *, void *))((uint64_t)p->addr + IS_ENABLED_FUNC_LEN); 
       (void)(*func3)(argv[0], argv[1], argv[2]);
       break;
     case 4:
-      func4 = (void (*)(void *, void *, void *, void *))((uint64_t)p->addr + 12); 
+      func4 = (void (*)(void *, void *, void *, void *))((uint64_t)p->addr + IS_ENABLED_FUNC_LEN); 
       (void)(*func4)(argv[0], argv[1], argv[2], argv[3]);
       break;
     case 5:
-      func5 = (void (*)(void *, void *, void *, void *, void *))((uint64_t)p->addr + 12); 
+      func5 = (void (*)(void *, void *, void *, void *, void *))((uint64_t)p->addr + IS_ENABLED_FUNC_LEN); 
       (void)(*func5)(argv[0], argv[1], argv[2], argv[3], argv[4]);
       break;
     case 6:
-      func6 = (void (*)(void *, void *, void *, void *, void *, void *))((uint64_t)p->addr + 12); 
+      func6 = (void (*)(void *, void *, void *, void *, void *, void *))((uint64_t)p->addr + IS_ENABLED_FUNC_LEN); 
       (void)(*func6)(argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
       break;
     }
@@ -596,6 +719,7 @@ namespace node {
     return dof;
   }
 
+#ifdef __APPLE__
   uint32_t DTraceProbe::ProbeOffset(char *dof, uint8_t argc) {
     return (uint32_t) ((uint64_t) this->addr - (uint64_t) dof + 18);
   }
@@ -603,6 +727,15 @@ namespace node {
   uint32_t DTraceProbe::IsEnabledOffset(char *dof) {
     return (uint32_t) ((uint64_t) this->addr - (uint64_t) dof + 6);
   }
+#else
+  uint32_t DTraceProbe::ProbeOffset(char *dof, uint8_t argc) {
+    return (32 + 6 + (argc * 3));
+  }
+
+  uint32_t DTraceProbe::IsEnabledOffset(char *dof) {
+    return (8);
+  }
+#endif
   
   extern "C" void
   init(Handle<Object> target) {

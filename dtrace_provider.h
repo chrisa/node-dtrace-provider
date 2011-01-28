@@ -11,6 +11,11 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#ifndef __APPLE__
+#include <stdlib.h>
+#include <malloc.h>
+#endif
+
 namespace node {
 
   using namespace v8;
