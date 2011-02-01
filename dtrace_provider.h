@@ -40,6 +40,10 @@ namespace node {
     DTraceProbe() {
       next = NULL;
     }
+    
+    ~DTraceProbe() {
+      free(addr);
+    }
 
     void *Dof();
     uint32_t ProbeOffset(char *dof, uint8_t argc);
@@ -65,10 +69,12 @@ namespace node {
     
     uint8_t Argc();
 
-  protected:
     ~DTraceProbeDef() {
       delete probe;
       delete next;
+      free(name);
+      for (int i = 0; (types[i] != NULL && i < 7); i++)
+	free(types[i]);
     }
 
   private:
@@ -115,9 +121,9 @@ namespace node {
     void AddData(void *data, size_t length);
     void *Header();
     
-  protected:
     ~DOFSection() {
       free(data);
+      delete(next);
     }
     
   private:
@@ -138,9 +144,9 @@ namespace node {
     void Generate();
     void Load();
 
-  protected:
     ~DOFFile() {
       free(dof);
+      delete(sections);
     }
     
   private:
@@ -159,9 +165,8 @@ namespace node {
 
     int Add(char *string);
     
-  protected:
     ~DOFStrtab() {
-
+      // data freed by superclass
     }
     
   private:
@@ -175,8 +180,8 @@ namespace node {
     char *name;
     DTraceProbeDef *probe_defs;
     DTraceProbe *probes;
+    DOFFile *file;
 
-  protected:
     static v8::Handle<v8::Value> New(const v8::Arguments& args);
     static v8::Handle<v8::Value> AddProbe(const v8::Arguments& args);
     static v8::Handle<v8::Value> Enable(const v8::Arguments& args);
@@ -186,10 +191,15 @@ namespace node {
       name = NULL;
       probe_defs = NULL;
       probes = NULL;
+      file = NULL;
     }
 
     ~DTraceProvider() {
-      // disable provider
+      // disable provider first!
+
+      free(name);
+      delete(file);
+      delete(probe_defs);
     }
     
   private:

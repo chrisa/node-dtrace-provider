@@ -265,7 +265,9 @@ namespace node {
       
       d->probe = p;
       provider->AppendProbe(p);
-      probes->AddData(p->Dof(), sizeof(dof_probe_t));
+      void *dof = p->Dof();
+      probes->AddData(dof, sizeof(dof_probe_t));
+      free(dof);
       probes->entsize = sizeof(dof_probe_t);
     }
 
@@ -325,6 +327,8 @@ namespace node {
 
     file->Generate();
     file->Load();
+
+    provider->file = file;
 
     return Undefined();
   }
@@ -570,7 +574,9 @@ namespace node {
 
     size_t offset = sizeof(dof_hdr_t);
     for (DOFSection *section = this->sections; section != NULL; section = section->next) {
-      (void) memcpy((this->dof + offset), section->Header(), sizeof(dof_sec_t));
+      void *header = section->Header();
+      (void) memcpy((this->dof + offset), header, sizeof(dof_sec_t));
+      free(header);
       offset += sizeof(dof_sec_t);
     }
 

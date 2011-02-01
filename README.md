@@ -62,12 +62,9 @@ scope to improve this, with more elaborate argument handling.
 
 ## CAVEATS
 
-This is the first working version, and there are a number of important
-cleanups to be made. Creating a provider will leak memory, although
-firing a probe should not. 
-
 Performance is not where it should be, most especially the
 disabled-probe effect. Probes are already using the "is-enabled"
-feature of DTrace, but too much work needs to be done before that's
+feature of DTrace to control execution of the arguments-gathering
+callback, but too much work needs to be done before that's
 checked. Improving this may imply changes to the API shown in the
 example above.
