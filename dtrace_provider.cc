@@ -375,8 +375,16 @@ namespace node {
     }
 
     // invoke fire callback
+    TryCatch try_catch;
+
     Local<Function> cb = Local<Function>::Cast(args[1]);
-    Local<Value> probe_args = cb->Call(Context::GetCurrent()->Global(), 0, NULL);
+    Local<Value> probe_args = cb->Call(provider->handle_, 0, NULL);
+
+    // exception in args callback?
+    if (try_catch.HasCaught()) {
+      FatalException(try_catch);
+      return Undefined();
+    }
 
     // check return
     if (!probe_args->IsArray()) {
