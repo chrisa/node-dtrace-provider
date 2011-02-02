@@ -28,9 +28,9 @@ Here's a simple example of creating a provider:
     var dtp = d.createDTraceProvider("nodeapp");
     dtp.addProbe("probe1", "int", "int");
     dtp.addProbe("probe2", "char *");
-    dtp.enable();
-    dtp.fire("probe1", function(p) { return [1, 2]; });
-    dtp.fire("probe2", function(p) { return ["hello, dtrace"]; });
+    dtp.enable();	   
+    dtp.fire("probe1", function() { return [1, 2]; });
+    dtp.fire("probe2", function() { return ["hello, dtrace"]; });
 
 This example creates a provider called "nodeapp", and adds two
 probes. It then enables the provider, at which point the provider
@@ -45,6 +45,9 @@ The probes are then fired, which produces this output:
     CPU     ID                    FUNCTION:NAME
       1 123562                      func:probe1                 1                2
       1 123563                      func:probe2   hello, dtrace                    
+
+Arguments are captured by a callback only executed when the probe is
+enabled. This means you can do more expensive work to gather arguments.
 
 ## PLATFORM SUPPORT
 
