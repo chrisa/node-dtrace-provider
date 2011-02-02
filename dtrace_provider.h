@@ -15,6 +15,17 @@
 #include <stdlib.h>
 #include <malloc.h>
 #endif
+    
+#ifdef __APPLE__	
+#define FUNC_SIZE 32
+#define IS_ENABLED_FUNC_LEN 12
+#else
+#define FUNC_SIZE 96
+#define IS_ENABLED_FUNC_LEN 32
+#endif
+
+#define ARGTYPE_INT  1
+#define ARGTYPE_CHAR 2
 
 namespace node {
 
@@ -36,6 +47,7 @@ namespace node {
     uint8_t xargc;
     void *addr;
     DTraceProbe *next;
+    int types[6];
 
     DTraceProbe() {
       next = NULL;
@@ -48,7 +60,8 @@ namespace node {
     void *Dof();
     uint32_t ProbeOffset(char *dof, uint8_t argc);
     uint32_t IsEnabledOffset(char *dof);
-    
+    void CreateTracepoints();
+    void Fire(Local<Array> a);
   };
 
   class DTraceProbeDef {

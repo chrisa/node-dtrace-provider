@@ -74,150 +74,6 @@ namespace node {
     return Undefined();
   }
 
-  static void *create_probe(int argc) {
-    
-#ifdef __APPLE__	
-#define FUNC_SIZE 32
-#define IS_ENABLED_FUNC_LEN 12
-#else
-#define FUNC_SIZE 96
-#define IS_ENABLED_FUNC_LEN 32
-#endif
-    
-#ifdef __APPLE__
-    void *p = (void *) valloc(FUNC_SIZE);
-    (void)mprotect((void *)p, FUNC_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC);
-
-    uint8_t tracepoints[FUNC_SIZE] = {
-      0x55, 0x48, 0x89, 0xe5, 
-      0x48, 0x33, 0xc0, 0x90, 
-      0x90, 0xc9, 0xc3, 0x00,
-      0x55, 0x48, 0x89, 0xe5, 
-      0x90, 0x0f, 0x1f, 0x40, 
-      0x00, 0xc9, 0xc3, 0x0f, 
-      0x1f, 0x44, 0x00, 0x00,
-      0x00, 0x00, 0x00, 0x00
-    };
-
-    memcpy(p, tracepoints, FUNC_SIZE);
-
-#else // Solaris 32 bit
-
-    void *p = (void *) memalign(PAGESIZE, FUNC_SIZE);
-    (void)mprotect((void *)p, FUNC_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC);
-
-    uint8_t is_enabled[FUNC_SIZE] = {
-      0x55, 0x89, 0xe5, 0x83,
-      0xec, 0x08, 0x33, 0xc0,
-      0x90, 0x90, 0x90, 0x89,
-      0x45, 0xfc, 0x83, 0x7d,
-      0xfc, 0x00, 0x0f, 0x95,
-      0xc0, 0x0f, 0xb6, 0xc0,
-      0x89, 0x45, 0xfc, 0x8b,
-      0x45, 0xfc, 0xc9, 0xc3,
-    };
-    memcpy(p, is_enabled, FUNC_SIZE);
-    
-    switch(argc) {
-    case 0:
-      {
-	uint8_t probe[FUNC_SIZE] = {
-	  0x55, 0x89, 0xe5, 0x83,
-	  0xec, 0x08, 0x90, 0x90,
-	  0x90, 0x90, 0x90, 0x83,
-	  0xc4, 0x00, 0xc9, 0xc3
-	};
-	memcpy((uint8_t *)p + 32, probe, FUNC_SIZE - 32);
-      }
-      break;
-    case 1:
-      {
-	uint8_t probe[FUNC_SIZE] = {
-	  0x55, 0x89, 0xe5, 0x83,
-	  0xec, 0x08, 0xff, 0x75,
-	  0x08, 0x90, 0x90, 0x90,
-	  0x90, 0x90, 0x83, 0xc4,
-	  0x00, 0xc9, 0xc3
-	};
-	memcpy((uint8_t *)p + 32, probe, FUNC_SIZE - 32);
-      }
-      break;
-    case 2:
-      {
-	uint8_t probe[FUNC_SIZE] = {
-	  0x55, 0x89, 0xe5, 0x83,
-	  0xec, 0x08, 0xff, 0x75,
-	  0x0c, 0xff, 0x75, 0x08,
-	  0x90, 0x90, 0x90, 0x90,
-	  0x90, 0x83, 0xc4, 0x00,
-	  0xc9, 0xc3
-	};
-	memcpy((uint8_t *)p + 32, probe, FUNC_SIZE - 32);
-      }
-      break;
-    case 3:
-      {
-	uint8_t probe[FUNC_SIZE] = {
-	  0x55, 0x89, 0xe5, 0x83,
-	  0xec, 0x08, 0xff, 0x75,
-	  0x10, 0xff, 0x75, 0x0c,
-	  0xff, 0x75, 0x08, 0x90,
-	  0x90, 0x90, 0x90, 0x90,
-	  0x83, 0xc4, 0x00, 0xc9,
-	  0xc3
-	};
-	memcpy((uint8_t *)p + 32, probe, FUNC_SIZE - 32);
-      }
-      break;
-    case 4:
-      {
-	uint8_t probe[FUNC_SIZE] = {
-	  0x55, 0x89, 0xe5, 0x83,
-	  0xec, 0x08, 0xff, 0x75,
-	  0x14, 0xff, 0x75, 0x10,
-	  0xff, 0x75, 0x0c, 0xff, 
-	  0x75, 0x08, 0x90, 0x90,
-	  0x90, 0x90, 0x90, 0x83,
-	  0xc4, 0x00, 0xc9, 0xc3
-	};
-	memcpy((uint8_t *)p + 32, probe, FUNC_SIZE - 32);
-      }
-    case 5:
-      {
-	uint8_t probe[FUNC_SIZE] = {
-	  0x55, 0x89, 0xe5, 0x83,
-	  0xec, 0x08, 0xff, 0x75,
-	  0x18, 0xff, 0x75, 0x14,
-	  0xff, 0x75, 0x10, 0xff,
-	  0x75, 0x0c, 0xff, 0x75,
-	  0x08, 0x90, 0x90, 0x90,
-	  0x90, 0x90, 0x83, 0xc4,
-	  0x00, 0xc9, 0xc3
-	};
-	memcpy((uint8_t *)p + 32, probe, FUNC_SIZE - 32);
-      }
-    case 6:
-      {
-	uint8_t probe[FUNC_SIZE] = {
-	  0x55, 0x89, 0xe5, 0x83,
-	  0xec, 0x08, 0xff, 0x75,
-	  0x1c, 0xff, 0x75, 0x18,
-	  0xff, 0x75, 0x14, 0xff,
-	  0x75, 0x10, 0xff, 0x75,
-	  0x0c, 0xff, 0x75, 0x08,
-	  0x90, 0x90, 0x90, 0x90,
-	  0x90, 0x83, 0xc4, 0x00,
-	  0xc9, 0xc3
-	};
-	memcpy((uint8_t *)p + 32, probe, FUNC_SIZE - 32);
-      }
-      break;
-    }
-#endif
-
-    return p;
-  }
-
   Handle<Value> DTraceProvider::Enable(const Arguments& args) {
     HandleScope scope;
     DTraceProvider *provider = ObjectWrap::Unwrap<DTraceProvider>(args.Holder());
@@ -228,25 +84,32 @@ namespace node {
     uint32_t argidx = 0;
     uint32_t offidx = 0;
 
-    DOFSection *probes = new DOFSection(DOF_SECT_PROBES, 1);
-
     if (provider->probe_defs == NULL) {
       return Undefined();
     }
+
+    DOFSection *probes = new DOFSection(DOF_SECT_PROBES, 1);
 
     // PROBES SECTION
     for (DTraceProbeDef *d = provider->probe_defs; d != NULL; d = d->next) {
       uint8_t argc = 0;
       dof_stridx_t argv = 0;
+      DTraceProbe *p = new DTraceProbe();
 
       for (int i = 0; d->types[i] != NULL && i < 6; i++) {
 	dof_stridx_t type = strtab->Add(d->types[i]);
 	argc++;
 	if (argv == 0)
 	  argv = type;
+	
+	if (!strcmp("char *", d->types[i])) {
+	  p->types[i] = ARGTYPE_CHAR;
+	}
+	else {
+	  p->types[i] = ARGTYPE_INT;
+	}
       }
 
-      DTraceProbe *p = new DTraceProbe();
       p->name	    = strtab->Add(d->name);
       p->func	    = strtab->Add(d->function);
       p->noffs    = 1;
@@ -258,16 +121,19 @@ namespace node {
       p->xargc    = argc;
       p->nargv    = argv;
       p->xargv    = argv;
-      p->addr     = create_probe(argc);
+      p->CreateTracepoints();
 
       argidx += argc;
       offidx++;
       
       d->probe = p;
+
       provider->AppendProbe(p);
+
       void *dof = p->Dof();
       probes->AddData(dof, sizeof(dof_probe_t));
       free(dof);
+
       probes->entsize = sizeof(dof_probe_t);
     }
 
@@ -335,16 +201,6 @@ namespace node {
 
   Handle<Value> DTraceProvider::Fire(const Arguments& args) {
     HandleScope scope;
-    void *argv[6];
-
-    void (*func0)();
-    void (*func1)(void *);
-    void (*func2)(void *, void *);
-    void (*func3)(void *, void *, void *);
-    void (*func4)(void *, void *, void *, void *);
-    void (*func5)(void *, void *, void *, void *, void *);
-    void (*func6)(void *, void *, void *, void *, void *, void *);
-
     DTraceProvider *provider = ObjectWrap::Unwrap<DTraceProvider>(args.Holder());
 
     if (!args[0]->IsString()) {
@@ -362,6 +218,7 @@ namespace node {
     // find the probe we should be firing
     DTraceProbeDef *pd;
     for (pd = provider->probe_defs; pd != NULL; pd = pd->next) {
+      // XXX eliminate this search
       if (!strcmp(pd->name, *probe_name)) {
 	break;
       }
@@ -372,7 +229,7 @@ namespace node {
 
     // perform is-enabled check
     DTraceProbe *p = pd->probe;
-    void *(*isfunc)() = (void* (*)())((uint64_t)p->addr); 
+    void *(*isfunc)() = (void* (*)())(p->addr); 
     long isenabled = (long)(*isfunc)();
     if (isenabled == 0) {
       return Undefined();
@@ -396,55 +253,7 @@ namespace node {
     }
 
     Local<Array> a = Local<Array>::Cast(probe_args);
-    
-    for (int i = 0; pd->types[i] != NULL && i < 6; i++) {
-      if (!strcmp("char *", pd->types[i])) {
-	// char *
-	String::AsciiValue str(a->Get(i)->ToString());
-	argv[i] = (void *) strdup(*str); // should note which arg indexes to free
-      }
-      else {
-	// int
-	argv[i] = (void *) a->Get(i)->ToInteger()->Value();
-      }
-    }
-
-    switch (pd->Argc()) {
-    case 0:
-      func0 = (void (*)())((uint64_t)p->addr + IS_ENABLED_FUNC_LEN); 
-      (void)(*func0)();
-      break;
-    case 1:
-      func1 = (void (*)(void *))((uint64_t)p->addr + IS_ENABLED_FUNC_LEN); 
-      (void)(*func1)(argv[0]);
-      break;
-    case 2:
-      func2 = (void (*)(void *, void *))((uint64_t)p->addr + IS_ENABLED_FUNC_LEN); 
-      (void)(*func2)(argv[0], argv[1]);
-      break;
-    case 3:
-      func3 = (void (*)(void *, void *, void *))((uint64_t)p->addr + IS_ENABLED_FUNC_LEN); 
-      (void)(*func3)(argv[0], argv[1], argv[2]);
-      break;
-    case 4:
-      func4 = (void (*)(void *, void *, void *, void *))((uint64_t)p->addr + IS_ENABLED_FUNC_LEN); 
-      (void)(*func4)(argv[0], argv[1], argv[2], argv[3]);
-      break;
-    case 5:
-      func5 = (void (*)(void *, void *, void *, void *, void *))((uint64_t)p->addr + IS_ENABLED_FUNC_LEN); 
-      (void)(*func5)(argv[0], argv[1], argv[2], argv[3], argv[4]);
-      break;
-    case 6:
-      func6 = (void (*)(void *, void *, void *, void *, void *, void *))((uint64_t)p->addr + IS_ENABLED_FUNC_LEN); 
-      (void)(*func6)(argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
-      break;
-    }
-
-    for (int i = 0; pd->types[i] != NULL && i < 6; i++) {
-      if (!strcmp("char *", pd->types[i])) {
-	free(argv[i]);
-      }
-    }
+    p->Fire(a);
 
     return Undefined();
   }
@@ -489,162 +298,6 @@ namespace node {
     }
 
     return size;
-  }
-
-  // --------------------------------------------------------------------
-  // DOFFile
-
-  static uint8_t dof_version(uint8_t header_version) {
-    uint8_t dof_version;
-    /* DOF versioning: Apple always needs version 3, but Solaris can use
-       1 or 2 depending on whether is-enabled probes are needed. */
-#ifdef __APPLE__
-    dof_version = DOF_VERSION_3;
-#else
-    switch(header_version) {
-    case 1:
-      dof_version = DOF_VERSION_1;
-      break;
-    case 2:
-      dof_version = DOF_VERSION_2;
-      break;
-    default:
-      dof_version = DOF_VERSION;
-    }
-#endif
-    return dof_version;
-  } 
-
-  void DOFFile::AppendSection(DOFSection *section) {
-    if (this->sections == NULL)
-      this->sections = section;
-    else {
-      DOFSection *s;
-      for (s = this->sections; (s->next != NULL); s = s->next) ;
-      s->next = section;
-    }
-  } 
-
-  void DOFFile::Generate() {
-    dof_hdr_t header;
-    memset(&header, 0, sizeof(header));
-
-    header.dofh_ident[DOF_ID_MAG0] = DOF_MAG_MAG0;
-    header.dofh_ident[DOF_ID_MAG1] = DOF_MAG_MAG1;
-    header.dofh_ident[DOF_ID_MAG2] = DOF_MAG_MAG2;
-    header.dofh_ident[DOF_ID_MAG3] = DOF_MAG_MAG3;
-	  
-    header.dofh_ident[DOF_ID_MODEL]    = DOF_MODEL_NATIVE;
-    header.dofh_ident[DOF_ID_ENCODING] = DOF_ENCODE_NATIVE;
-    header.dofh_ident[DOF_ID_DIFVERS]  = DIF_VERSION;
-    header.dofh_ident[DOF_ID_DIFIREG]  = DIF_DIR_NREGS;
-    header.dofh_ident[DOF_ID_DIFTREG]  = DIF_DTR_NREGS;
-
-    header.dofh_ident[DOF_ID_VERSION] = dof_version(2); /* default 2, will be 3 on OSX */
-    header.dofh_hdrsize = sizeof(dof_hdr_t);
-    header.dofh_secsize = sizeof(dof_sec_t);
-    header.dofh_secoff = sizeof(dof_hdr_t);
-
-    header.dofh_secnum = 6; // count of sections
-
-    uint64_t filesz = sizeof(dof_hdr_t) + (sizeof(dof_sec_t) * header.dofh_secnum);
-    uint64_t loadsz = filesz;
-
-    for (DOFSection *section = this->sections; section != NULL; section = section->next) {
-      size_t pad = 0;
-      section->offset = filesz;
-
-      if (section->align > 1) {
-	size_t i = section->offset % section->align;
-	if (i > 0) {
-	  pad = section->align - i;
-	  section->offset = (pad + section->offset);
-	  section->pad = pad;
-	}
-      }
-
-      filesz += section->size + pad;
-      if (section->flags & 1)
-	loadsz += section->size + pad;
-    }
-
-    header.dofh_loadsz = loadsz;
-    header.dofh_filesz = filesz;
-    memcpy(this->dof, &header, sizeof(dof_hdr_t));
-
-    size_t offset = sizeof(dof_hdr_t);
-    for (DOFSection *section = this->sections; section != NULL; section = section->next) {
-      void *header = section->Header();
-      (void) memcpy((this->dof + offset), header, sizeof(dof_sec_t));
-      free(header);
-      offset += sizeof(dof_sec_t);
-    }
-
-    for (DOFSection *section = this->sections; section != NULL; section = section->next) {
-      if (section->pad > 0) {
-	(void) memcpy((this->dof + offset), "\0", section->pad);
-	offset += section->pad;
-      }
-      (void) memcpy((this->dof + offset), section->data, section->size);
-      offset += section->size;
-    }
-  }
-
-#ifdef __APPLE__
-  static const char *helper = "/dev/dtracehelper";
-
-  static int _loaddof(int fd, dof_helper_t *dh)
-  {
-    int ret;
-    uint8_t buffer[sizeof(dof_ioctl_data_t) + sizeof(dof_helper_t)];
-    dof_ioctl_data_t* ioctlData = (dof_ioctl_data_t*)buffer;
-    user_addr_t val;
-
-    ioctlData->dofiod_count = 1LL;
-    memcpy(&ioctlData->dofiod_helpers[0], dh, sizeof(dof_helper_t));
-    
-    val = (user_addr_t)(unsigned long)ioctlData;
-    ret = ioctl(fd, DTRACEHIOC_ADDDOF, &val);
-
-    return ret;
-  }
-
-  static int _removedof(int fd, int gen)
-  {
-    return 0;
-  }
-
-#else /* Solaris */
-
-  /* ignore Sol10 GA ... */
-  static const char *helper = "/dev/dtrace/helper";
-
-  static int _loaddof(int fd, dof_helper_t *dh)
-  {
-    return ioctl(fd, DTRACEHIOC_ADDDOF, dh);
-  }
-
-  static int _removedof(int fd, int gen)
-  {
-    return ioctl(fd, DTRACEHIOC_REMOVE, gen);
-  }
-
-#endif
-
-  void DOFFile::Load() {
-    dof_helper_t dh;
-    int fd;
-    dof_hdr_t *dof;
-    dof = (dof_hdr_t *) this->dof;
-
-    dh.dofhp_dof  = (uintptr_t)dof;
-    dh.dofhp_addr = (uintptr_t)dof;
-    (void) snprintf(dh.dofhp_mod, sizeof (dh.dofhp_mod), "module");
-
-    fd = open(helper, O_RDWR);
-    this->gen = _loaddof(fd, &dh);
-
-    (void) close(fd);
   }
 
   // --------------------------------------------------------------------
@@ -707,50 +360,6 @@ namespace node {
     return argc;
   }
 
-  // --------------------------------------------------------------------
-  // DTraceProbe
-
-  void *DTraceProbe::Dof() {
-    dof_probe_t p;
-    memset(&p, 0, sizeof(p));
-
-    p.dofpr_addr     = (uint64_t) this->addr;
-    p.dofpr_func     = this->func;
-    p.dofpr_name     = this->name;
-    p.dofpr_nargv    = this->nargv;
-    p.dofpr_xargv    = this->xargv;
-    p.dofpr_argidx   = this->argidx;
-    p.dofpr_offidx   = this->offidx;
-    p.dofpr_nargc    = this->nargc;
-    p.dofpr_xargc    = this->xargc;
-    p.dofpr_noffs    = this->noffs;
-    p.dofpr_enoffidx = this->enoffidx;
-    p.dofpr_nenoffs  = this->nenoffs;
-
-    void *dof = malloc(sizeof(dof_probe_t));
-    memcpy(dof, &p, sizeof(dof_probe_t));
-
-    return dof;
-  }
-
-#ifdef __APPLE__
-  uint32_t DTraceProbe::ProbeOffset(char *dof, uint8_t argc) {
-    return (uint32_t) ((uint64_t) this->addr - (uint64_t) dof + 18);
-  }
-
-  uint32_t DTraceProbe::IsEnabledOffset(char *dof) {
-    return (uint32_t) ((uint64_t) this->addr - (uint64_t) dof + 6);
-  }
-#else
-  uint32_t DTraceProbe::ProbeOffset(char *dof, uint8_t argc) {
-    return (32 + 6 + (argc * 3));
-  }
-
-  uint32_t DTraceProbe::IsEnabledOffset(char *dof) {
-    return (8);
-  }
-#endif
-  
   extern "C" void
   init(Handle<Object> target) {
     DTraceProvider::Initialize(target);
