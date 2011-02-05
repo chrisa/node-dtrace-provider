@@ -9,11 +9,11 @@ You could use this to expose high-level information about the inner
 workings of your application, or to create a specific context in which
 to look at information from other runtime or system-level providers. 
 
-The provider is not created in the usual way, by declaring it, and
-then changing the build process to include it, but dynamically at
+The provider is not created in the usual way, by declaring it and then
+changing the build process to include it, but instead dynamically at
 runtime. This is done entirely in-process, and there is no background
-compiler invocation. The process creating the provider need not run as
-root.
+compiler or dtrace(1) invocation. The process creating the provider
+need not run as root.
 
 ## INSTALL
 
@@ -70,4 +70,19 @@ disabled-probe effect. Probes are already using the "is-enabled"
 feature of DTrace to control execution of the arguments-gathering
 callback, but too much work needs to be done before that's
 checked. Improving this may imply changes to the API shown in the
-example above.
+example above. Please see TODO.md for the details. 
+
+## CONTRIBUTING
+
+The source is available at:
+
+  https://github.com/chrisa/node-dtrace-provider.
+
+For issues, please use the Github issue tracker linked to the
+repository. Github pull requests are very welcome. 
+
+## OTHER IMPLEMENTATIONS
+
+This node extension is derived from the ruby-dtrace gem, via the Perl
+module Devel::DTrace::Provider, both of which provide the same
+functionality to those languages.
