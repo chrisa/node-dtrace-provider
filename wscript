@@ -13,7 +13,7 @@ def configure(ctx):
     ctx.check_tool('compiler_cxx')
     ctx.check_tool('node_addon')
     if sys.platform.startswith("sunos") or sys.platform.startswith("darwin"):
-        conf.env.append_value('CXXFLAGS', ['-D_HAVE_DTRACE'])
+        ctx.env.append_value('CXXFLAGS', ['-D_HAVE_DTRACE'])
 
 def build(ctx):
     t = ctx.new_task_gen('cxx', 'shlib', 'node_addon')
