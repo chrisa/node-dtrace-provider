@@ -52,8 +52,8 @@ enabled. This means you can do more expensive work to gather arguments.
 ## PLATFORM SUPPORT
 
 The nature of this extension means that support must be added for each
-platform. Right now that support is only in place for OS X, 64 bit,
-but Solaris x86 and 32 bit support is on the way. 
+platform. Right now that support is only in place for OS X, 64 bit and
+Solaris, 32 bit.
 
 ## LIMITATIONS
 
