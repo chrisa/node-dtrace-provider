@@ -12,6 +12,8 @@ def set_options(ctx):
 def configure(ctx):
     ctx.check_tool('compiler_cxx')
     ctx.check_tool('node_addon')
+    if sys.platform.startswith("sunos") or sys.platform.startswith("darwin"):
+        ctx.env.append_value('CXXFLAGS', ['-D_HAVE_DTRACE'])
 
 def build(ctx):
     t = ctx.new_task_gen('cxx', 'shlib', 'node_addon')
@@ -21,8 +23,6 @@ def build(ctx):
         t.source.append('solaris-i386/dtrace_probe.cc')
     elif sys.platform.startswith("darwin"):
         t.source.append('darwin-x86_64/dtrace_probe.cc')
-    else:
-        ctx.fatal('Supported platforms: solaris-i386, darwin-x86_64')
 
 def shutdown():
     t = 'DTraceProviderBindings.node'

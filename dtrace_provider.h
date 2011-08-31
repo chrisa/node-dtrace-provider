@@ -2,6 +2,8 @@
 #include <node_object_wrap.h>
 #include <v8.h>
 
+#ifdef _HAVE_DTRACE
+
 #include <sys/dtrace.h>
 #include <sys/types.h>
 #include <sys/mman.h>
@@ -87,7 +89,7 @@ namespace node {
       delete next;
       free(name);
       for (int i = 0; (types[i] != NULL && i < 7); i++)
-	free(types[i]);
+        free(types[i]);
     }
 
   private:
@@ -222,3 +224,5 @@ namespace node {
   
   void InitDTraceProvider(v8::Handle<v8::Object> target);
 }
+
+#endif // _HAVE_DTRACE
