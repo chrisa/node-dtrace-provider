@@ -11,3 +11,5 @@ dtrace-provider - Changes
    Fixes memory leaks
    Improved performance, enabled- and disabled-probe. 
 
+ * 0.0.3:
+   Builds to a stubbed-out version on non-DTrace platforms (Mark Cavage <mcavage@gmail.com>)
