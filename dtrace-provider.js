@@ -1,12 +1,19 @@
 var sys = require("sys");
+
+var DTraceProvider;
+
+function DTraceProviderStub() {}
+DTraceProviderStub.prototype.addProbe = function() {};
+DTraceProviderStub.prototype.enable = function() {};
+DTraceProviderStub.prototype.fire = function() {};
+
 try {
     var binding = require('./DTraceProviderBindings');
-    var DTraceProvider = binding.DTraceProvider;
-    var dtrace_provider = true;
+    DTraceProvider = binding.DTraceProvider;
 } catch (e) {
-    sys.puts(e);
-    var dtrace_provider = false;
+    DTraceProvider = DTraceProviderStub;
 }
+
 
 exports.DTraceProvider = DTraceProvider;
 exports.createDTraceProvider = function(name) {

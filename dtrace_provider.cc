@@ -3,6 +3,8 @@
 
 #include <node.h>
 
+#ifdef _HAVE_DTRACE
+
 namespace node {
   
   using namespace v8;
@@ -366,3 +368,5 @@ namespace node {
   }
   
 } // namespace node
+
+#endif // _HAVE_DTRACE

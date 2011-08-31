@@ -1,4 +1,4 @@
-var d = require('dtrace-provider');
+var d = require('../dtrace-provider');
 var dtp = d.createDTraceProvider("nodeapp");
 dtp.addProbe("probe1", "int", "int", "int", "int", "int", "int");
 dtp.addProbe("probe2", "char *", "char *", "char *", "char *", "char *", "char *");
