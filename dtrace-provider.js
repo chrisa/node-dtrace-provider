@@ -12,6 +12,7 @@ try {
     DTraceProvider = binding.DTraceProvider;
 } catch (e) {
     DTraceProvider = DTraceProviderStub;
+    console.log(e);
 }
 
 
