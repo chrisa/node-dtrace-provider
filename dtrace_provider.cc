@@ -8,24 +8,32 @@
 namespace node {
   
   using namespace v8;
+
+  Persistent<FunctionTemplate> DTraceProvider::constructor_template;
+  Persistent<FunctionTemplate> DTraceProbeDef::constructor_template;
   
   void DTraceProvider::Initialize(Handle<Object> target) {
     HandleScope scope;
 
     Local<FunctionTemplate> t = FunctionTemplate::New(DTraceProvider::New);
-    t->InstanceTemplate()->SetInternalFieldCount(1);
-    t->SetClassName(String::NewSymbol("DTraceProvider"));
+    constructor_template = Persistent<FunctionTemplate>::New(t);
+    constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
+    constructor_template->SetClassName(String::NewSymbol("DTraceProvider"));
 
-    NODE_SET_PROTOTYPE_METHOD(t, "addProbe", DTraceProvider::AddProbe);
-    NODE_SET_PROTOTYPE_METHOD(t, "enable", DTraceProvider::Enable);
-    NODE_SET_PROTOTYPE_METHOD(t, "fire", DTraceProvider::Fire);
+    NODE_SET_PROTOTYPE_METHOD(constructor_template, "addProbe", DTraceProvider::AddProbe);
+    NODE_SET_PROTOTYPE_METHOD(constructor_template, "enable", DTraceProvider::Enable);
+    NODE_SET_PROTOTYPE_METHOD(constructor_template, "fire", DTraceProvider::Fire);
 
-    target->Set(String::NewSymbol("DTraceProvider"), t->GetFunction());
+    target->Set(String::NewSymbol("DTraceProvider"), constructor_template->GetFunction());
+
+    DTraceProbeDef::Initialize(target);
   }
   
   Handle<Value> DTraceProvider::New(const Arguments& args) {
     HandleScope scope;
     DTraceProvider *p = new DTraceProvider();
+
+    p->Wrap(args.This());
 
     if (args.Length() != 1 || !args[0]->IsString()) {
       return ThrowException(Exception::Error(String::New(
@@ -35,7 +43,6 @@ namespace node {
     String::AsciiValue name(args[0]->ToString());
     p->name = strdup(*name);
 
-    p->Wrap(args.Holder());
     return args.This();
   }
 
@@ -43,28 +50,15 @@ namespace node {
     HandleScope scope;
     DTraceProvider *provider = ObjectWrap::Unwrap<DTraceProvider>(args.Holder());
 
-    if (!args[0]->IsString()) {
-      return ThrowException(Exception::Error(String::New(
-        "Must give probe name as first argument")));
-    }
-
-    DTraceProbeDef *probe = new DTraceProbeDef();
-    probe->next = NULL;
-
-    // init argument types
-    int i;
-    for (i = 0; (args[i+1]->IsString() && i < 6); i++) {
-      String::AsciiValue type(args[i+1]->ToString());
-      probe->types[i] = strdup(*type);
-    }
-    probe->types[i] = NULL;
-
-    // init name and function
-    String::AsciiValue name(args[0]->ToString());
-    probe->name = strdup(*name);
-    probe->function = (char *) "func";
+    // create a DTraceProbeDef object - hateful, what's the right way?
+    Handle<Function> klass = DTraceProbeDef::constructor_template->GetFunction();
+    v8::Handle<v8::Value> args2[] = { 
+      args[0], args[1], args[2], args[3], args[4], args[5], args[6]
+    };
+    Handle<Value> pd = klass->NewInstance(7, args2);
 
     // append to probe list
+    DTraceProbeDef *probe = ObjectWrap::Unwrap<DTraceProbeDef>(pd->ToObject());
     if (provider->probe_defs == NULL)
       provider->probe_defs = probe;
     else {
@@ -72,8 +66,7 @@ namespace node {
       for (p = provider->probe_defs; (p->next != NULL); p = p->next) ;
       p->next = probe;
     }
-
-    return Undefined();
+    return pd;
   }
 
   Handle<Value> DTraceProvider::Enable(const Arguments& args) {
@@ -229,35 +222,7 @@ namespace node {
       return Undefined();
     }
 
-    // perform is-enabled check
-    DTraceProbe *p = pd->probe;
-    void *(*isfunc)() = (void* (*)())(p->addr); 
-    long isenabled = (long)(*isfunc)();
-    if (isenabled == 0) {
-      return Undefined();
-    }
-
-    // invoke fire callback
-    TryCatch try_catch;
-
-    Local<Function> cb = Local<Function>::Cast(args[1]);
-    Local<Value> probe_args = cb->Call(provider->handle_, 0, NULL);
-
-    // exception in args callback?
-    if (try_catch.HasCaught()) {
-      FatalException(try_catch);
-      return Undefined();
-    }
-
-    // check return
-    if (!probe_args->IsArray()) {
-      return Undefined();
-    }
-
-    Local<Array> a = Local<Array>::Cast(probe_args);
-    p->Fire(a);
-
-    return Undefined();
+    pd->_fire(args[1]);
   }
 
   void DTraceProvider::AppendProbe(DTraceProbe *probe) {
@@ -362,11 +327,97 @@ namespace node {
     return argc;
   }
 
+  void DTraceProbeDef::Initialize(Handle<Object> target) {
+    HandleScope scope;
+
+    Local<FunctionTemplate> t = FunctionTemplate::New(DTraceProbeDef::New);
+    constructor_template = Persistent<FunctionTemplate>::New(t);
+    constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
+    constructor_template->SetClassName(String::NewSymbol("DTraceProbeDef"));
+
+    NODE_SET_PROTOTYPE_METHOD(constructor_template, "fire", DTraceProbeDef::Fire);
+
+    target->Set(String::NewSymbol("DTraceProbeDef"), constructor_template->GetFunction());
+  }
+
+  Handle<Value> DTraceProbeDef::New(const Arguments& args) {
+    HandleScope scope;
+    DTraceProbeDef *probe = new DTraceProbeDef();
+    probe->Wrap(args.This());
+
+    if (!args[0]->IsString()) {
+      return ThrowException(Exception::Error(String::New(
+        "Must give probe name as first argument")));
+    }
+
+    probe->next = NULL;
+
+    // init argument types
+    int i;
+    for (i = 0; (args[i+1]->IsString() && i < 6); i++) {
+      String::AsciiValue type(args[i+1]->ToString());
+      probe->types[i] = strdup(*type);
+    }
+    probe->types[i] = NULL;
+
+    // init name and function
+    String::AsciiValue name(args[0]->ToString());
+    probe->name = strdup(*name);
+    probe->function = (char *) "func";
+
+    return args.This();
+  }  
+
+  Handle<Value> DTraceProbeDef::Fire(const Arguments& args) {
+    HandleScope scope;
+    DTraceProbeDef *pd = ObjectWrap::Unwrap<DTraceProbeDef>(args.Holder());
+
+    return pd->_fire(args[0]);
+  }
+  
+  Handle<Value> DTraceProbeDef::_fire(v8::Local<v8::Value> argsfn) {
+
+    // perform is-enabled check
+    DTraceProbe *p = this->probe;
+    void *(*isfunc)() = (void* (*)())(p->addr); 
+    long isenabled = (long)(*isfunc)();
+    if (isenabled == 0) {
+      return Undefined();
+    }
+
+    // invoke fire callback
+    TryCatch try_catch;
+
+    if (!argsfn->IsFunction()) {
+      return ThrowException(Exception::Error(String::New(
+        "Must give probe value callback as argument")));
+    }
+    
+    Local<Function> cb = Local<Function>::Cast(argsfn);
+    Local<Value> probe_args = cb->Call(this->handle_, 0, NULL);
+
+    // exception in args callback?
+    if (try_catch.HasCaught()) {
+      FatalException(try_catch);
+      return Undefined();
+    }
+
+    // check return
+    if (!probe_args->IsArray()) {
+      return Undefined();
+    }
+
+    Local<Array> a = Local<Array>::Cast(probe_args);
+    p->Fire(a);
+
+    return Undefined();
+  }
+
   extern "C" void
   init(Handle<Object> target) {
     DTraceProvider::Initialize(target);
   }
-  
+
 } // namespace node
 
 #endif // _HAVE_DTRACE
