@@ -16,13 +16,14 @@ def configure(ctx):
         ctx.env.append_value('CXXFLAGS', ['-D_HAVE_DTRACE'])
 
 def build(ctx):
-    t = ctx.new_task_gen('cxx', 'shlib', 'node_addon')
-    t.target = 'DTraceProviderBindings'
-    t.source = ['dtrace_provider.cc', 'dtrace_dof.cc']
-    if sys.platform.startswith("sunos"):
-        t.source.append('solaris-i386/dtrace_probe.cc')
-    elif sys.platform.startswith("darwin"):
-        t.source.append('darwin-x86_64/dtrace_probe.cc')
+    if sys.platform.startswith("sunos") or sys.platform.startswith("darwin"):
+        t = ctx.new_task_gen('cxx', 'shlib', 'node_addon')
+        t.target = 'DTraceProviderBindings'
+        t.source = ['dtrace_provider.cc', 'dtrace_dof.cc']
+        if sys.platform.startswith("sunos"):
+            t.source.append('solaris-i386/dtrace_probe.cc')
+        elif sys.platform.startswith("darwin"):
+            t.source.append('darwin-x86_64/dtrace_probe.cc')
 
 def shutdown():
     t = 'DTraceProviderBindings.node'
