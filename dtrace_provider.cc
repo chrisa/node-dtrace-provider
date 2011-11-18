@@ -2,6 +2,7 @@
 #include <v8.h>
 
 #include <node.h>
+#include <stdio.h>
 
 #ifdef _HAVE_DTRACE
 
@@ -10,7 +11,6 @@ namespace node {
   using namespace v8;
 
   Persistent<FunctionTemplate> DTraceProvider::constructor_template;
-  Persistent<FunctionTemplate> DTraceProbeDef::constructor_template;
   
   void DTraceProvider::Initialize(Handle<Object> target) {
     HandleScope scope;
@@ -26,7 +26,7 @@ namespace node {
 
     target->Set(String::NewSymbol("DTraceProvider"), constructor_template->GetFunction());
 
-    DTraceProbeDef::Initialize(target);
+    DTraceProbe::Initialize(target);
   }
   
   Handle<Value> DTraceProvider::New(const Arguments& args) {
@@ -41,7 +41,10 @@ namespace node {
     }
     
     String::AsciiValue name(args[0]->ToString());
-    p->name = strdup(*name);
+    p->provider.name = strdup(*name);
+    p->provider.probedefs = NULL;
+    p->provider.probes = NULL;
+    p->provider.file = NULL;
 
     return args.This();
   }
@@ -50,22 +53,40 @@ namespace node {
     HandleScope scope;
     DTraceProvider *provider = ObjectWrap::Unwrap<DTraceProvider>(args.Holder());
 
-    // create a DTraceProbeDef object - hateful, what's the right way?
-    Handle<Function> klass = DTraceProbeDef::constructor_template->GetFunction();
+    // create a DTraceProbe object - hateful, what's the right way?
+    Handle<Function> klass = DTraceProbe::constructor_template->GetFunction();
     v8::Handle<v8::Value> args2[] = { 
       args[0], args[1], args[2], args[3], args[4], args[5], args[6]
     };
     Handle<Value> pd = klass->NewInstance(7, args2);
 
     // append to probe list
-    DTraceProbeDef *probe = ObjectWrap::Unwrap<DTraceProbeDef>(pd->ToObject());
-    if (provider->probe_defs == NULL)
-      provider->probe_defs = probe;
+    DTraceProbe *probe = ObjectWrap::Unwrap<DTraceProbe>(pd->ToObject());
+    String::AsciiValue name(args[0]->ToString());
+
+    probe->probedef.name = strdup(*name);
+    probe->probedef.function = strdup(*name);
+
+    for (int i = 1; i < 7; i++) {
+      String::AsciiValue argtype(args[i]->ToString());
+      if (!strcmp("int", *argtype))
+        probe->probedef.types[i-1] = USDT_ARGTYPE_INTEGER;
+      else if (!strcmp("char *", *argtype))
+        probe->probedef.types[i-1] = USDT_ARGTYPE_STRING;
+      else
+        probe->probedef.types[i-1] = USDT_ARGTYPE_NONE;
+    }
+
+    usdt_provider_add_probe(&provider->provider, &probe->probedef);
+
+    if (provider->probes == NULL)
+      provider->probes = probe;
     else {
-      DTraceProbeDef *p;
-      for (p = provider->probe_defs; (p->next != NULL); p = p->next) ;
+      DTraceProbe *p;
+      for (p = provider->probes; (p->next != NULL); p = p->next) ;
       p->next = probe;
     }
+    
     return pd;
   }
 
@@ -73,123 +94,7 @@ namespace node {
     HandleScope scope;
     DTraceProvider *provider = ObjectWrap::Unwrap<DTraceProvider>(args.Holder());
 
-    DOFStrtab *strtab = new DOFStrtab(0);
-    dof_stridx_t pv_name = strtab->Add(provider->name);
-
-    uint32_t argidx = 0;
-    uint32_t offidx = 0;
-
-    if (provider->probe_defs == NULL) {
-      return Undefined();
-    }
-
-    DOFSection *probes = new DOFSection(DOF_SECT_PROBES, 1);
-
-    // PROBES SECTION
-    for (DTraceProbeDef *d = provider->probe_defs; d != NULL; d = d->next) {
-      uint8_t argc = 0;
-      dof_stridx_t argv = 0;
-      DTraceProbe *p = new DTraceProbe();
-
-      for (int i = 0; d->types[i] != NULL && i < 6; i++) {
-	dof_stridx_t type = strtab->Add(d->types[i]);
-	argc++;
-	if (argv == 0)
-	  argv = type;
-	
-	if (!strcmp("char *", d->types[i])) {
-	  p->types[i] = ARGTYPE_CHAR;
-	}
-	else {
-	  p->types[i] = ARGTYPE_INT;
-	}
-      }
-
-      p->name	    = strtab->Add(d->name);
-      p->func	    = strtab->Add(d->function);
-      p->noffs    = 1;
-      p->enoffidx = offidx;
-      p->argidx   = argidx;
-      p->nenoffs  = 1;
-      p->offidx   = offidx;
-      p->nargc    = argc;
-      p->xargc    = argc;
-      p->nargv    = argv;
-      p->xargv    = argv;
-      p->CreateTracepoints();
-
-      argidx += argc;
-      offidx++;
-      
-      d->probe = p;
-
-      provider->AppendProbe(p);
-
-      void *dof = p->Dof();
-      probes->AddData(dof, sizeof(dof_probe_t));
-      free(dof);
-
-      probes->entsize = sizeof(dof_probe_t);
-    }
-
-    // PRARGS SECTION
-    DOFSection *prargs = new DOFSection(DOF_SECT_PRARGS, 2);
-    for (DTraceProbeDef *d = provider->probe_defs; d != NULL; d = d->next) {
-      for (uint8_t i = 0; i < d->Argc(); i++) {
-	prargs->AddData(&i, 1);
-	prargs->entsize = 1;
-      }
-    }
-
-    // estimate DOF size here, allocate
-    size_t dof_size = provider->DofSize(strtab);
-
-    DOFFile *file = new DOFFile(dof_size);
-    file->AppendSection(strtab);
-    file->AppendSection(probes);
-    file->AppendSection(prargs);
-
-    // PROFFS SECTION
-    DOFSection *proffs = new DOFSection(DOF_SECT_PROFFS, 3);
-    for (DTraceProbeDef *d = provider->probe_defs; d != NULL; d = d->next) {
-      uint32_t off = d->probe->ProbeOffset(file->dof, d->Argc());
-      proffs->AddData(&off, 4);
-      proffs->entsize = 4;
-    }
-    file->AppendSection(proffs);
-
-    // PRENOFFS SECTION
-    DOFSection *prenoffs = new DOFSection(DOF_SECT_PRENOFFS, 4);
-    for (DTraceProbeDef *d = provider->probe_defs; d != NULL; d = d->next) {
-      uint32_t off = d->probe->IsEnabledOffset(file->dof);
-      prenoffs->AddData(&off, 4);
-      prenoffs->entsize = 4;
-    }
-    file->AppendSection(prenoffs);
-    
-    // PROVIDER SECTION
-    DOFSection *provider_s = new DOFSection(DOF_SECT_PROVIDER, 5);
-    dof_provider_t p;
-    memset(&p, 0, sizeof(p));
-    
-    p.dofpv_strtab   = 0;
-    p.dofpv_probes   = 1;
-    p.dofpv_prargs   = 2;
-    p.dofpv_proffs   = 3;
-    p.dofpv_prenoffs = 4;
-    p.dofpv_name     = pv_name;
-    p.dofpv_provattr = DOF_ATTR(DTRACE_STABILITY_EVOLVING, DTRACE_STABILITY_EVOLVING, DTRACE_STABILITY_EVOLVING);
-    p.dofpv_modattr  = DOF_ATTR(DTRACE_STABILITY_PRIVATE,  DTRACE_STABILITY_PRIVATE,  DTRACE_STABILITY_EVOLVING);
-    p.dofpv_funcattr = DOF_ATTR(DTRACE_STABILITY_PRIVATE,  DTRACE_STABILITY_PRIVATE,  DTRACE_STABILITY_EVOLVING);
-    p.dofpv_nameattr = DOF_ATTR(DTRACE_STABILITY_EVOLVING, DTRACE_STABILITY_EVOLVING, DTRACE_STABILITY_EVOLVING);
-    p.dofpv_argsattr = DOF_ATTR(DTRACE_STABILITY_EVOLVING, DTRACE_STABILITY_EVOLVING, DTRACE_STABILITY_EVOLVING);
-    provider_s->AddData(&p, sizeof(p));
-    file->AppendSection(provider_s);
-
-    file->Generate();
-    file->Load();
-
-    provider->file = file;
+    usdt_provider_enable(&provider->provider);
 
     return Undefined();
   }
@@ -211,206 +116,17 @@ namespace node {
     String::AsciiValue probe_name(args[0]->ToString());
 
     // find the probe we should be firing
-    DTraceProbeDef *pd;
-    for (pd = provider->probe_defs; pd != NULL; pd = pd->next) {
-      // XXX eliminate this search
-      if (!strcmp(pd->name, *probe_name)) {
-	break;
+    DTraceProbe *p;
+    for (p = provider->probes; p != NULL; p = p->next) {
+      if (!strcmp(p->probedef.name, *probe_name)) {
+        break;
       }
     }
-    if (pd == NULL) {
+    if (p == NULL) {
       return Undefined();
     }
 
-    pd->_fire(args[1]);
-  }
-
-  void DTraceProvider::AppendProbe(DTraceProbe *probe) {
-    if (this->probes == NULL)
-      this->probes = probe;
-    else {
-      DTraceProbe *p;
-      for (p = this->probes; (p->next != NULL); p = p->next) ;
-      p->next = probe;
-    }
-  } 
-
-  size_t DTraceProvider::DofSize(DOFStrtab *strtab) {
-    int args = 0;
-    int probes = 0;
-    size_t size = 0;
-
-    for (DTraceProbeDef *d = this->probe_defs; d != NULL; d = d->next) {
-      args += d->Argc();
-      probes++;
-    }
-    
-    size_t sections[8] = {
-      sizeof(dof_hdr_t),
-      sizeof(dof_sec_t) * 6,
-      strtab->size,
-      sizeof(dof_probe_t) * probes,
-      sizeof(uint8_t) * args,
-      sizeof(uint32_t) * probes,
-      sizeof(uint32_t) * probes,
-      sizeof(dof_provider_t),
-    };
-
-    for (int i = 0; i < 8; i++) {
-      size += sections[i];
-      size_t i = size % 8;
-      if (i > 0) {
-	size += (8 - i);
-      }
-    }
-
-    return size;
-  }
-
-  // --------------------------------------------------------------------
-  // DOFStrtab
-
-  int DOFStrtab::Add(char *string) {
-    size_t length = strlen(string);
-
-    if (this->data == NULL) {
-      this->strindex = 1;
-      this->data = (char *) malloc(1);
-      memcpy((void *) this->data, "\0", 1);
-    }
-
-    int i = this->strindex;
-    this->strindex += (length + 1);
-    this->data = (char *) realloc(this->data, this->strindex);
-    (void) memcpy((void *) (this->data + i), (void *)string, length + 1);
-    this->size = i + length + 1;
-
-    return i;
-  }
-
-  // --------------------------------------------------------------------
-  // DOFSection
-
-  void DOFSection::AddData(void *data, size_t length) {
-    if (this->data == NULL) {
-      this->data = (char *) malloc(1);
-    }
-    this->data = (char *) realloc((void *)this->data, this->size + length);
-    (void) memcpy(this->data + this->size, data, length);
-    this->size += length;
-  }
-
-  void *DOFSection::Header() {
-    dof_sec_t header;
-    memset(&header, 0, sizeof(header));
-    
-    header.dofs_flags	= this->flags;
-    header.dofs_type	= this->type;
-    header.dofs_offset	= this->offset;
-    header.dofs_size	= this->size;
-    header.dofs_entsize = this->entsize;
-    header.dofs_align	= this->align;
-
-    void *dof = malloc(sizeof(dof_sec_t));
-    memcpy(dof, &header, sizeof(dof_sec_t));
-    
-    return dof;
-  }
-
-  // --------------------------------------------------------------------
-  // DTraceProbeDef
-  
-  uint8_t DTraceProbeDef::Argc() {
-    uint8_t argc = 0;
-    for (int i = 0; this->types[i] != NULL && i < 6; i++)
-      argc++;
-    return argc;
-  }
-
-  void DTraceProbeDef::Initialize(Handle<Object> target) {
-    HandleScope scope;
-
-    Local<FunctionTemplate> t = FunctionTemplate::New(DTraceProbeDef::New);
-    constructor_template = Persistent<FunctionTemplate>::New(t);
-    constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
-    constructor_template->SetClassName(String::NewSymbol("DTraceProbeDef"));
-
-    NODE_SET_PROTOTYPE_METHOD(constructor_template, "fire", DTraceProbeDef::Fire);
-
-    target->Set(String::NewSymbol("DTraceProbeDef"), constructor_template->GetFunction());
-  }
-
-  Handle<Value> DTraceProbeDef::New(const Arguments& args) {
-    HandleScope scope;
-    DTraceProbeDef *probe = new DTraceProbeDef();
-    probe->Wrap(args.This());
-
-    if (!args[0]->IsString()) {
-      return ThrowException(Exception::Error(String::New(
-        "Must give probe name as first argument")));
-    }
-
-    probe->next = NULL;
-
-    // init argument types
-    int i;
-    for (i = 0; (args[i+1]->IsString() && i < 6); i++) {
-      String::AsciiValue type(args[i+1]->ToString());
-      probe->types[i] = strdup(*type);
-    }
-    probe->types[i] = NULL;
-
-    // init name and function
-    String::AsciiValue name(args[0]->ToString());
-    probe->name = strdup(*name);
-    probe->function = (char *) "func";
-
-    return args.This();
-  }  
-
-  Handle<Value> DTraceProbeDef::Fire(const Arguments& args) {
-    HandleScope scope;
-    DTraceProbeDef *pd = ObjectWrap::Unwrap<DTraceProbeDef>(args.Holder());
-
-    return pd->_fire(args[0]);
-  }
-  
-  Handle<Value> DTraceProbeDef::_fire(v8::Local<v8::Value> argsfn) {
-
-    // perform is-enabled check
-    DTraceProbe *p = this->probe;
-    void *(*isfunc)() = (void* (*)())(p->addr); 
-    long isenabled = (long)(*isfunc)();
-    if (isenabled == 0) {
-      return Undefined();
-    }
-
-    // invoke fire callback
-    TryCatch try_catch;
-
-    if (!argsfn->IsFunction()) {
-      return ThrowException(Exception::Error(String::New(
-        "Must give probe value callback as argument")));
-    }
-    
-    Local<Function> cb = Local<Function>::Cast(argsfn);
-    Local<Value> probe_args = cb->Call(this->handle_, 0, NULL);
-
-    // exception in args callback?
-    if (try_catch.HasCaught()) {
-      FatalException(try_catch);
-      return Undefined();
-    }
-
-    // check return
-    if (!probe_args->IsArray()) {
-      return Undefined();
-    }
-
-    Local<Array> a = Local<Array>::Cast(probe_args);
-    p->Fire(a);
-
-    return Undefined();
+    p->_fire(args[1]);
   }
 
   extern "C" void

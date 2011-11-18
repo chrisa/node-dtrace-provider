@@ -17,14 +17,18 @@ def configure(ctx):
 
 def build(ctx):
     if sys.platform.startswith("sunos") or sys.platform.startswith("darwin"):
+        ctx.new_task_gen(
+            rule = "cd ../libusdt && make && cd ../build",
+            shell = True
+            )
+        
         t = ctx.new_task_gen('cxx', 'shlib', 'node_addon')
         t.target = 'DTraceProviderBindings'
-        t.source = ['dtrace_provider.cc', 'dtrace_dof.cc']
-        if sys.platform.startswith("sunos"):
-            t.source.append('solaris-i386/dtrace_probe.cc')
-        elif sys.platform.startswith("darwin"):
-            t.source.append('darwin-x86_64/dtrace_probe.cc')
-
+        t.source = ['dtrace_provider.cc', 'dtrace_probe.cc']
+        t.includes = ['libusdt']
+        t.staticlib = 'usdt'
+        t.libpath = '../libusdt'
+        
 def shutdown():
     t = 'DTraceProviderBindings.node'
     if Options.commands['clean']:
