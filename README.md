@@ -26,11 +26,27 @@ Here's a simple example of creating a provider:
     var d = require('dtrace-provider');
 
     var dtp = d.createDTraceProvider("nodeapp");
-    dtp.addProbe("probe1", "int", "int");
-    dtp.addProbe("probe2", "char *");
+    var p1 = dtp.addProbe("probe1", "int", "int");
+    var p2 = dtp.addProbe("probe2", "char *");
     dtp.enable();	   
-    dtp.fire("probe1", function() { return [1, 2]; });
-    dtp.fire("probe2", function() { return ["hello, dtrace"]; });
+
+Probes may be fired via the provider object:
+
+    dtp.fire("probe1", function(p) {
+        return [1, 2];
+    });
+    dtp.fire("probe2", function(p) { 
+        return ["hello, dtrace via provider", "foo"];
+    });
+
+or via the probe objects themselves:
+
+    p1.fire(function(p) {
+      return [1, 2, 3, 4, 5, 6];
+    });
+    p2.fire(function(p) {
+      return ["hello, dtrace via probe", "foo"];
+    });
 
 This example creates a provider called "nodeapp", and adds two
 probes. It then enables the provider, at which point the provider
@@ -51,9 +67,9 @@ enabled. This means you can do more expensive work to gather arguments.
 
 ## PLATFORM SUPPORT
 
-The nature of this extension means that support must be added for each
-platform. Right now that support is only in place for OS X, 64 bit and
-Solaris, 32 bit.
+This initial libusdt-based version only supports 64 bit processes on
+Mac OS X. As more platform support is added to libusdt, those
+platforms will be supported by this module.
 
 ## LIMITATIONS
 
