@@ -1,5 +1,3 @@
-var sys = require("sys");
-
 var DTraceProvider;
 
 function DTraceProviderStub() {}
