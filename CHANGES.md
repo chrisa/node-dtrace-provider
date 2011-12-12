@@ -13,3 +13,8 @@ dtrace-provider - Changes
 
  * 0.0.3:
    Builds to a stubbed-out version on non-DTrace platforms (Mark Cavage <mcavage@gmail.com>)
+
+ * 0.0.4:
+   Remove unused "sys" import (Alex Whitman)
+   No longer builds an empty extension on non-DTrace platforms
+   Probe objects are made available to Javascript. 
