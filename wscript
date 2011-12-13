@@ -4,7 +4,7 @@ from os.path import exists, islink
 
 srcdir = '.'
 blddir = 'build'
-VERSION = '0.0.4'
+VERSION = '0.0.5'
 
 def set_options(ctx):
     ctx.tool_options('compiler_cxx')
