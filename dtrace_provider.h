@@ -66,24 +66,16 @@ namespace node {
     void Fire(Local<Array> a);
   };
 
-  class DTraceProbeDef : ObjectWrap {
+  class DTraceProbeDef {
 
   public:
-    static void Initialize(v8::Handle<v8::Object> target);
     char *function;
     char *types[7];
     char *name;
     DTraceProbe *probe;
     DTraceProbeDef *next;
 
-    static v8::Handle<v8::Value> New(const v8::Arguments& args);
-    static v8::Handle<v8::Value> Fire(const v8::Arguments& args);
-
-    Handle<Value> _fire(v8::Local<v8::Value>);
-
-    static Persistent<FunctionTemplate> constructor_template;
-
-  DTraceProbeDef() : ObjectWrap() {
+    DTraceProbeDef() {
       next     = NULL;
       name     = NULL;
       function = NULL;
@@ -226,7 +218,6 @@ namespace node {
     }
     
   private:
-    static Persistent<FunctionTemplate> constructor_template;
     void AppendProbe(DTraceProbe *);
     size_t DofSize(DOFStrtab *);
   };  
