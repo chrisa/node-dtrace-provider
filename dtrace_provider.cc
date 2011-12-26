@@ -6,9 +6,9 @@
 #ifdef _HAVE_DTRACE
 
 namespace node {
-  
+
   using namespace v8;
-  
+
   void DTraceProvider::Initialize(Handle<Object> target) {
     HandleScope scope;
 
@@ -22,7 +22,7 @@ namespace node {
 
     target->Set(String::NewSymbol("DTraceProvider"), t->GetFunction());
   }
-  
+
   Handle<Value> DTraceProvider::New(const Arguments& args) {
     HandleScope scope;
     DTraceProvider *p = new DTraceProvider();
@@ -31,7 +31,7 @@ namespace node {
       return ThrowException(Exception::Error(String::New(
         "Must give provider name as argument")));
     }
-    
+
     String::AsciiValue name(args[0]->ToString());
     p->name = strdup(*name);
 
@@ -103,7 +103,7 @@ namespace node {
 	argc++;
 	if (argv == 0)
 	  argv = type;
-	
+
 	if (!strcmp("char *", d->types[i])) {
 	  p->types[i] = ARGTYPE_CHAR;
 	}
@@ -127,7 +127,7 @@ namespace node {
 
       argidx += argc;
       offidx++;
-      
+
       d->probe = p;
 
       provider->AppendProbe(p);
@@ -173,12 +173,12 @@ namespace node {
       prenoffs->entsize = 4;
     }
     file->AppendSection(prenoffs);
-    
+
     // PROVIDER SECTION
     DOFSection *provider_s = new DOFSection(DOF_SECT_PROVIDER, 5);
     dof_provider_t p;
     memset(&p, 0, sizeof(p));
-    
+
     p.dofpv_strtab   = 0;
     p.dofpv_probes   = 1;
     p.dofpv_prargs   = 2;
@@ -225,13 +225,14 @@ namespace node {
 	break;
       }
     }
-    if (pd == NULL) {
+
+    if (pd == NULL || pd->probe == NULL) {
       return Undefined();
     }
 
     // perform is-enabled check
     DTraceProbe *p = pd->probe;
-    void *(*isfunc)() = (void* (*)())(p->addr); 
+    void *(*isfunc)() = (void* (*)())(p->addr);
     long isenabled = (long)(*isfunc)();
     if (isenabled == 0) {
       return Undefined();
@@ -268,7 +269,7 @@ namespace node {
       for (p = this->probes; (p->next != NULL); p = p->next) ;
       p->next = probe;
     }
-  } 
+  }
 
   size_t DTraceProvider::DofSize(DOFStrtab *strtab) {
     int args = 0;
@@ -279,7 +280,7 @@ namespace node {
       args += d->Argc();
       probes++;
     }
-    
+
     size_t sections[8] = {
       sizeof(dof_hdr_t),
       sizeof(dof_sec_t) * 6,
@@ -338,7 +339,7 @@ namespace node {
   void *DOFSection::Header() {
     dof_sec_t header;
     memset(&header, 0, sizeof(header));
-    
+
     header.dofs_flags	= this->flags;
     header.dofs_type	= this->type;
     header.dofs_offset	= this->offset;
@@ -348,13 +349,13 @@ namespace node {
 
     void *dof = malloc(sizeof(dof_sec_t));
     memcpy(dof, &header, sizeof(dof_sec_t));
-    
+
     return dof;
   }
 
   // --------------------------------------------------------------------
   // DTraceProbeDef
-  
+
   uint8_t DTraceProbeDef::Argc() {
     uint8_t argc = 0;
     for (int i = 0; this->types[i] != NULL && i < 6; i++)
@@ -366,7 +367,7 @@ namespace node {
   init(Handle<Object> target) {
     DTraceProvider::Initialize(target);
   }
-  
+
 } // namespace node
 
 #endif // _HAVE_DTRACE
