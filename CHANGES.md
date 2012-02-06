@@ -21,3 +21,6 @@ dtrace-provider - Changes
 
  * 0.0.5:
    Revert changes to make probe objects available.
+
+ * 0.0.6:
+   Fix for segfault trying to use non-enabled probes (Mark Cavage <mcavage@gmail.com>)
