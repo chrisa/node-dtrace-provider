@@ -24,3 +24,6 @@ dtrace-provider - Changes
 
  * 0.0.6:
    Fix for segfault trying to use non-enabled probes (Mark Cavage <mcavage@gmail.com>)
+
+ * 0.0.7:
+   Fix for multiple enable() calls breaking providers.
