@@ -193,6 +193,7 @@ namespace node {
   public:
     static void Initialize(v8::Handle<v8::Object> target);
     char *name;
+    int enabled;
     DTraceProbeDef *probe_defs;
     DTraceProbe *probes;
     DOFFile *file;
@@ -207,6 +208,7 @@ namespace node {
       probe_defs = NULL;
       probes = NULL;
       file = NULL;
+      enabled = 0;
     }
 
     ~DTraceProvider() {

@@ -90,6 +90,10 @@ namespace node {
       return Undefined();
     }
 
+    if (provider->enabled == 1) {
+      return Undefined();
+    }
+
     DOFSection *probes = new DOFSection(DOF_SECT_PROBES, 1);
 
     // PROBES SECTION
@@ -198,6 +202,7 @@ namespace node {
 
     provider->file = file;
 
+    provider->enabled = 1;
     return Undefined();
   }
 
