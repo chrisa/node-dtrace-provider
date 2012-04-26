@@ -61,7 +61,13 @@ The maximum number of probe arguments is 6. There's scope to increase
 this, with some extra complexity in the platform-specific code.
  
 The data types supported are "int" and "char *". There's definitely
-scope to improve this, with more elaborate argument handling. 
+scope to improve this, with more elaborate argument handling - see
+TODO.md
+
+You can only create a provider once - although you don't have to do it
+immediately, once you've set up a provider you can't change its
+definition. It should be possible to enable updates - again, see
+TODO.md.
 
 ## CAVEATS
 
@@ -69,8 +75,10 @@ Performance is not where it should be, most especially the
 disabled-probe effect. Probes are already using the "is-enabled"
 feature of DTrace to control execution of the arguments-gathering
 callback, but too much work needs to be done before that's
-checked. Improving this may imply changes to the API shown in the
-example above. Please see TODO.md for the details. 
+checked. That being said, unless your (disabled) probes are
+insanely hot, this shouldn't be a problem.
+
+Please see TODO.md for the details. 
 
 ## CONTRIBUTING
 
