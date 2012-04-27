@@ -62,7 +62,7 @@ namespace node {
     v8::Handle<v8::Value> args2[] = { 
       args[0], args[1], args[2], args[3], args[4], args[5], args[6]
     };
-    Handle<Value> pd = klass->NewInstance(7, args2);
+    Handle<Value> pd = Persistent<Value>::New(klass->NewInstance(7, args2));
 
     // append to probe list
     DTraceProbe *probe = ObjectWrap::Unwrap<DTraceProbe>(pd->ToObject());
@@ -94,7 +94,10 @@ namespace node {
     HandleScope scope;
     DTraceProvider *provider = ObjectWrap::Unwrap<DTraceProvider>(args.Holder());
 
-    int ret = usdt_provider_enable(provider->provider);
+    if (usdt_provider_enable(provider->provider) != 0) {
+      return ThrowException(Exception::Error(String::New(
+        "Failure to enable")));
+    }      
 
     return Undefined();
   }
