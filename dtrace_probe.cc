@@ -45,7 +45,7 @@ namespace node {
   
   Handle<Value> DTraceProbe::_fire(v8::Local<v8::Value> argsfn) {
 
-    if (usdt_is_enabled(this->probedef.probe) == 0) {
+    if (usdt_is_enabled(this->probedef->probe) == 0) {
       return Undefined();
     }
 
@@ -75,7 +75,7 @@ namespace node {
     void *argv[6];
 
     for (int i = 0; i < a->Length(); i++) {
-      if (this->probedef.types[i] == USDT_ARGTYPE_STRING) {
+      if (this->probedef->types[i] == USDT_ARGTYPE_STRING) {
 	// char *
 	String::AsciiValue str(a->Get(i)->ToString());
 	argv[i] = (void *) strdup(*str);
@@ -85,7 +85,8 @@ namespace node {
 	argv[i] = (void *)(int) a->Get(i)->ToInteger()->Value();
       }
     }
-    usdt_fire_probe(this->probedef.probe, a->Length(), argv);
+
+    usdt_fire_probe(this->probedef->probe, a->Length(), argv);
 
     return Undefined();
   }

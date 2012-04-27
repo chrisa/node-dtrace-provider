@@ -41,16 +41,20 @@ namespace node {
     }
     
     String::AsciiValue name(args[0]->ToString());
-    p->provider.name = strdup(*name);
-    p->provider.probedefs = NULL;
-    p->provider.probes = NULL;
-    p->provider.file = NULL;
+
+    if ((p->provider = usdt_create_provider(*name, "modname")) == NULL) {
+      return ThrowException(Exception::Error(String::New(
+        "usdt_create_provider failed")));
+    }
 
     return args.This();
   }
 
   Handle<Value> DTraceProvider::AddProbe(const Arguments& args) {
     HandleScope scope;
+    const char *types[USDT_ARG_MAX];
+    int argc = 0;
+
     DTraceProvider *provider = ObjectWrap::Unwrap<DTraceProvider>(args.Holder());
 
     // create a DTraceProbe object - hateful, what's the right way?
@@ -64,20 +68,16 @@ namespace node {
     DTraceProbe *probe = ObjectWrap::Unwrap<DTraceProbe>(pd->ToObject());
     String::AsciiValue name(args[0]->ToString());
 
-    probe->probedef.name = strdup(*name);
-    probe->probedef.function = strdup(*name);
-
-    for (int i = 1; i < 7; i++) {
-      String::AsciiValue argtype(args[i]->ToString());
-      if (!strcmp("int", *argtype))
-        probe->probedef.types[i-1] = USDT_ARGTYPE_INTEGER;
-      else if (!strcmp("char *", *argtype))
-        probe->probedef.types[i-1] = USDT_ARGTYPE_STRING;
-      else
-        probe->probedef.types[i-1] = USDT_ARGTYPE_NONE;
+    for (int i = 0; i < USDT_ARG_MAX; i++) {
+      if (i < args.Length() - 1) {
+        String::AsciiValue type(args[i + 1]->ToString());
+        types[i] = strdup(*type);
+        argc++;
+      }
     }
 
-    usdt_provider_add_probe(&provider->provider, &probe->probedef);
+    probe->probedef = usdt_create_probe(*name, *name, argc, types);
+    usdt_provider_add_probe(provider->provider, probe->probedef);
 
     if (provider->probes == NULL)
       provider->probes = probe;
@@ -94,7 +94,7 @@ namespace node {
     HandleScope scope;
     DTraceProvider *provider = ObjectWrap::Unwrap<DTraceProvider>(args.Holder());
 
-    usdt_provider_enable(&provider->provider);
+    int ret = usdt_provider_enable(provider->provider);
 
     return Undefined();
   }
@@ -118,7 +118,7 @@ namespace node {
     // find the probe we should be firing
     DTraceProbe *p;
     for (p = provider->probes; p != NULL; p = p->next) {
-      if (!strcmp(p->probedef.name, *probe_name)) {
+      if (!strcmp(p->probedef->name, *probe_name)) {
         break;
       }
     }

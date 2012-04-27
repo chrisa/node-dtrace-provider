@@ -17,4 +17,3 @@ dtp.fire("probe1", function(p) {
 dtp.fire("probe2", function(p) { 
     return ["hello, dtrace via provider", "foo", "bar", "baz", "fred", "barney"];
 });
-

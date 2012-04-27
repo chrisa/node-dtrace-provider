@@ -18,16 +18,16 @@ def configure(ctx):
 def build(ctx):
     if sys.platform.startswith("sunos") or sys.platform.startswith("darwin"):
         ctx.new_task_gen(
-            rule = "cd ../libusdt && make && cd ../build",
+            rule = "cd ../../libusdt && make && cd -",
             shell = True
             )
         
         t = ctx.new_task_gen('cxx', 'shlib', 'node_addon')
         t.target = 'DTraceProviderBindings'
         t.source = ['dtrace_provider.cc', 'dtrace_probe.cc']
-        t.includes = ['libusdt']
+        t.includes = ['../libusdt']
         t.staticlib = 'usdt'
-        t.libpath = '../libusdt'
+        t.libpath = '../../libusdt'
         
 def shutdown():
     t = 'DTraceProviderBindings.node'
@@ -36,3 +36,5 @@ def shutdown():
     if Options.commands['build']:
        if exists('build/default/' + t) and not exists(t):
        	  symlink('build/default/' + t, t)
+       if exists('build/Release/' + t) and not exists(t):
+          symlink('build/Release/' + t, t)

@@ -1,4 +1,4 @@
-var sys = require("sys");
+var util = require('util');
 
 var DTraceProvider;
 
@@ -11,6 +11,7 @@ try {
     var binding = require('./DTraceProviderBindings');
     DTraceProvider = binding.DTraceProvider;
 } catch (e) {
+    util.debug(e);
     DTraceProvider = DTraceProviderStub;
 }
 
