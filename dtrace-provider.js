@@ -3,7 +3,11 @@ var util = require('util');
 var DTraceProvider;
 
 function DTraceProviderStub() {}
-DTraceProviderStub.prototype.addProbe = function() {};
+DTraceProviderStub.prototype.addProbe = function() {
+    return {
+        'fire': function() { }
+    };
+};
 DTraceProviderStub.prototype.enable = function() {};
 DTraceProviderStub.prototype.fire = function() {};
 
