@@ -94,10 +94,8 @@ namespace node {
     HandleScope scope;
     DTraceProvider *provider = ObjectWrap::Unwrap<DTraceProvider>(args.Holder());
 
-    if (usdt_provider_enable(provider->provider) != 0) {
-      return ThrowException(Exception::Error(String::New(
-        "Failure to enable")));
-    }      
+    if (usdt_provider_enable(provider->provider) != 0)
+      return ThrowException(Exception::Error(String::New(usdt_errstr(provider->provider))));
 
     return Undefined();
   }
