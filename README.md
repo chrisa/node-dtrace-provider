@@ -65,28 +65,30 @@ The probes are then fired, which produces this output:
 Arguments are captured by a callback only executed when the probe is
 enabled. This means you can do more expensive work to gather arguments.
 
+The maximum number of arguments supported is 32. 
+
 ## PLATFORM SUPPORT
 
-This initial libusdt-based version only supports 64 bit processes on
-Mac OS X. As more platform support is added to libusdt, those
-platforms will be supported by this module.
+This libusdt-based Node.JS module supports 64 and 32 bit processes on
+Mac OS X and Solaris-like systems such as Illumos or SmartOS. As more
+platform support is added to libusdt, those platforms will be
+supported by this module. See libusdt's status at:
+
+  https://github.com/chrisa/libusdt#readme
 
 ## LIMITATIONS
-
-The maximum number of probe arguments is 6. There's scope to increase
-this, with some extra complexity in the platform-specific code.
  
-The data types supported are "int" and "char *". There's definitely
-scope to improve this, with more elaborate argument handling. 
+The data types supported are "int" and "char *". Support for
+structured types is planned, depending on support from the host DTrace
+implementation for the necessary translators. 
 
 ## CAVEATS
 
-Performance is not where it should be, most especially the
-disabled-probe effect. Probes are already using the "is-enabled"
-feature of DTrace to control execution of the arguments-gathering
-callback, but too much work needs to be done before that's
-checked. Improving this may imply changes to the API shown in the
-example above. Please see TODO.md for the details. 
+There is some overhead to probes, even when disabled. Probes are
+already using the "is-enabled" feature of DTrace to control execution
+of the arguments-gathering callback, but some work still needs to be
+done before that's checked. This overhead should not be a problem
+unless probes are placed in particularly hot code paths.
 
 ## CONTRIBUTING
 
