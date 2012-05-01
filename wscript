@@ -6,6 +6,8 @@ srcdir = '.'
 blddir = 'build'
 VERSION = '0.1.1'
 
+libusdtdir = 'libusdt' 
+
 def set_options(ctx):
     ctx.tool_options('compiler_cxx')
 
@@ -18,16 +20,16 @@ def configure(ctx):
 def build(ctx):
     if sys.platform.startswith("sunos") or sys.platform.startswith("darwin"):
         ctx.new_task_gen(
-            rule = "cd ../libusdt && make && cd -",
+            rule = "cd ../" + libusdtdir + " && make clean all && cd -",
             shell = True
             )
         
         t = ctx.new_task_gen('cxx', 'shlib', 'node_addon')
         t.target = 'DTraceProviderBindings'
         t.source = ['dtrace_provider.cc', 'dtrace_probe.cc']
-        t.includes = ['libusdt']
+        t.includes = [libusdtdir]
         t.staticlib = 'usdt'
-        t.libpath = '../libusdt'
+        t.libpath = "../" + libusdtdir
         
 def shutdown():
     t = 'DTraceProviderBindings.node'
