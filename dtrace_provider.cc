@@ -57,12 +57,9 @@ namespace node {
 
     DTraceProvider *provider = ObjectWrap::Unwrap<DTraceProvider>(args.Holder());
 
-    // create a DTraceProbe object - hateful, what's the right way?
+    // create a DTraceProbe object
     Handle<Function> klass = DTraceProbe::constructor_template->GetFunction();
-    v8::Handle<v8::Value> args2[] = { 
-      args[0], args[1], args[2], args[3], args[4], args[5], args[6]
-    };
-    Handle<Value> pd = Persistent<Value>::New(klass->NewInstance(7, args2));
+    Handle<Value> pd = Persistent<Value>::New(klass->NewInstance());
 
     // append to probe list
     DTraceProbe *probe = ObjectWrap::Unwrap<DTraceProbe>(pd->ToObject());

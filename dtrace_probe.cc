@@ -27,19 +27,12 @@ namespace node {
   Handle<Value> DTraceProbe::New(const Arguments& args) {
     DTraceProbe *probe = new DTraceProbe();
     probe->Wrap(args.This());
-
-    if (!args[0]->IsString()) {
-      return ThrowException(Exception::Error(String::New(
-        "Must give probe name as first argument")));
-    }
-
     return args.This();
   }  
 
   Handle<Value> DTraceProbe::Fire(const Arguments& args) {
     HandleScope scope;
     DTraceProbe *pd = ObjectWrap::Unwrap<DTraceProbe>(args.Holder());
-
     return pd->_fire(args[0]);
   }
   
@@ -72,9 +65,14 @@ namespace node {
     }
 
     Local<Array> a = Local<Array>::Cast(probe_args);
-    void *argv[6];
+    void *argv[USDT_ARG_MAX];
 
-    for (int i = 0; i < a->Length(); i++) {
+    // limit argc to the defined number of probe args
+    int argc = a->Length();
+    if (argc > this->probedef->argc)
+      argc = this->probedef->argc;
+    
+    for (int i = 0; i < argc; i++) {
       if (this->probedef->types[i] == USDT_ARGTYPE_STRING) {
 	// char *
 	String::AsciiValue str(a->Get(i)->ToString());
@@ -86,7 +84,7 @@ namespace node {
       }
     }
 
-    usdt_fire_probe(this->probedef->probe, a->Length(), argv);
+    usdt_fire_probe(this->probedef->probe, argc, argv);
 
     return Undefined();
   }
