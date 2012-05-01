@@ -1,6 +1,6 @@
 // expected output:
 // 
-// $ sudo dtrace -Zn 'nodeapp*:::{ trace(arg0); }' -c 'node test/enabled_again.js'
+// $ sudo dtrace -Zn 'nodeapp*:::{ trace(arg0); }' -c 'node test/enabled-again.js'
 // dtrace: description 'nodeapp*:::' matched 0 probes
 // CPU     ID                    FUNCTION:NAME
 //   1   5456                      func:probe1                 1
