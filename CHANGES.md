@@ -27,3 +27,6 @@ dtrace-provider - Changes
 
  * 0.0.7:
    Fix for multiple enable() calls breaking providers.
+
+ * 0.0.8:
+   Removed overridden "scripts" section from package.json, breaking Windows installs
