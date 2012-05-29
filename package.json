@@ -6,6 +6,5 @@
   "homepage" : "https://github.com/chrisa/node-dtrace-provider#readme",
   "author" : { "name" : "Chris Andrews", "email": "chris@nodnol.org" },
   "main" : "./dtrace-provider.js",
-  "repository" : { "type" : "git", "url" : "http://github.com/chrisa/node-dtrace-provider.git" },
-  "scripts": { "install": "node-waf configure build" }
+  "repository" : { "type" : "git", "url" : "http://github.com/chrisa/node-dtrace-provider.git" }
 }
