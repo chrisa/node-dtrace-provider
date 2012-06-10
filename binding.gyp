@@ -5,6 +5,7 @@
       'sources': [
 	'dtrace_provider.cc',
 	'dtrace_dof.cc',
+	'./libusdt/*',
       ],
       'conditions': [
 	[ 'OS=="mac"', { 'sources': ['darwin-x86_64/drtace_probe.cc'],
