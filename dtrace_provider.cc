@@ -299,9 +299,9 @@ namespace node {
 
     for (int i = 0; i < 8; i++) {
       size += sections[i];
-      size_t i = size % 8;
-      if (i > 0) {
-	size += (8 - i);
+      size_t j = size % 8;
+      if (j > 0) {
+        size += (8 - j);
       }
     }
 
