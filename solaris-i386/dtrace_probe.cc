@@ -14,7 +14,7 @@ namespace node {
     dof_probe_t p;
     memset(&p, 0, sizeof(p));
 
-    p.dofpr_addr     = (uint32_t) this->addr;
+    p.dofpr_addr     = (uint64_t) this->addr;
     p.dofpr_func     = this->func;
     p.dofpr_name     = this->name;
     p.dofpr_nargv    = this->nargv;
@@ -182,31 +182,31 @@ namespace node {
 
     switch (nargc) {
     case 0:
-      func0 = (void (*)())((uint32_t)addr + IS_ENABLED_FUNC_LEN); 
+      func0 = (void (*)())((uint64_t)addr + IS_ENABLED_FUNC_LEN); 
       (void)(*func0)();
       break;
     case 1:
-      func1 = (void (*)(void *))((uint32_t)addr + IS_ENABLED_FUNC_LEN); 
+      func1 = (void (*)(void *))((uint64_t)addr + IS_ENABLED_FUNC_LEN); 
       (void)(*func1)(argv[0]);
       break;
     case 2:
-      func2 = (void (*)(void *, void *))((uint32_t)addr + IS_ENABLED_FUNC_LEN); 
+      func2 = (void (*)(void *, void *))((uint64_t)addr + IS_ENABLED_FUNC_LEN); 
       (void)(*func2)(argv[0], argv[1]);
       break;
     case 3:
-      func3 = (void (*)(void *, void *, void *))((uint32_t)addr + IS_ENABLED_FUNC_LEN); 
+      func3 = (void (*)(void *, void *, void *))((uint64_t)addr + IS_ENABLED_FUNC_LEN); 
       (void)(*func3)(argv[0], argv[1], argv[2]);
       break;
     case 4:
-      func4 = (void (*)(void *, void *, void *, void *))((uint32_t)addr + IS_ENABLED_FUNC_LEN); 
+      func4 = (void (*)(void *, void *, void *, void *))((uint64_t)addr + IS_ENABLED_FUNC_LEN); 
       (void)(*func4)(argv[0], argv[1], argv[2], argv[3]);
       break;
     case 5:
-      func5 = (void (*)(void *, void *, void *, void *, void *))((uint32_t)addr + IS_ENABLED_FUNC_LEN); 
+      func5 = (void (*)(void *, void *, void *, void *, void *))((uint64_t)addr + IS_ENABLED_FUNC_LEN); 
       (void)(*func5)(argv[0], argv[1], argv[2], argv[3], argv[4]);
       break;
     case 6:
-      func6 = (void (*)(void *, void *, void *, void *, void *, void *))((uint32_t)addr + IS_ENABLED_FUNC_LEN); 
+      func6 = (void (*)(void *, void *, void *, void *, void *, void *))((uint64_t)addr + IS_ENABLED_FUNC_LEN); 
       (void)(*func6)(argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
       break;
     }
