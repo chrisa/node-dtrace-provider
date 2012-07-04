@@ -4,7 +4,7 @@ from os.path import exists, islink
 
 srcdir = '.'
 blddir = 'build'
-VERSION = '0.0.7'
+VERSION = '0.0.9'
 
 def set_options(ctx):
     ctx.tool_options('compiler_cxx')
@@ -14,6 +14,9 @@ def configure(ctx):
     ctx.check_tool('node_addon')
     if sys.platform.startswith("sunos") or sys.platform.startswith("darwin"):
         ctx.env.append_value('CXXFLAGS', ['-D_HAVE_DTRACE'])
+    if sys.platform.startswith("darwin"):
+        ctx.env.append_value('CXXFLAGS', ['-m64'])
+        ctx.env.LINKFLAGS = ['-arch', 'x86_64']
 
 def build(ctx):
     if sys.platform.startswith("sunos") or sys.platform.startswith("darwin"):
