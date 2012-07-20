@@ -8,7 +8,7 @@
       ],
       'conditions': [
 	[ 'OS=="mac"', { 'sources': ['darwin-x86_64/dtrace_probe.cc'],
-			 'defines': ['CXXFLAGS', '-D_HAVE_DTRACE',],
+			 'defines': ['cflags', '-D_HAVE_DTRACE',],
 			 'actions': [{'action_name': 'build_libusdt',
 				     'action': ['cd ../libusdtdir', 
 						'make clean all',
@@ -18,7 +18,7 @@
 		       }
 	], 
 	[ 'OS=="solaris"', {'sources': ['solaris-i386/dtrace_probe.cc'], 
-			    'defines': ['CXXFLAGS', '-D_HAVE_DTRACE',],
+			    'defines': ['cflags', '-D_HAVE_DTRACE',],
 			    'actions': [{'action_name': 'build_libusdt',
 					'action': ['cd ../libusdtdir', 
 						    'make clean all',
