@@ -7,7 +7,7 @@
 	'dtrace_probe.cc',
       ],
       'conditions': [
-	[ 'OS=="mac"', { 'sources': ['darwin-x86_64/drtace_probe.cc'],
+	[ 'OS=="mac"', { 'sources': ['darwin-x86_64/dtrace_probe.cc'],
 			 'defines': ['CXXFLAGS', '-D_HAVE_DTRACE',],
 			 'actions': [{'action_name': 'build_libusdt',
 				     'action': ['cd ../libusdtdir', 
