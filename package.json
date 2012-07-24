@@ -7,5 +7,5 @@
   "author" : { "name" : "Chris Andrews", "email": "chris@nodnol.org" },
   "main" : "./dtrace-provider.js",
   "repository" : { "type" : "git", "url" : "http://github.com/chrisa/node-dtrace-provider.git" },
-  "scripts": { "install": "node-waf configure build" }
+  "scripts": { "install": "node-gyp rebuild" }
 }
