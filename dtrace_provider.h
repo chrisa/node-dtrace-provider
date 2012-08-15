@@ -2,7 +2,6 @@
 #include <node_object_wrap.h>
 #include <v8.h>
 
-#ifdef _HAVE_DTRACE
 extern "C" {
 #include <usdt.h>
 }
@@ -20,7 +19,7 @@ extern "C" {
 #include <stdlib.h>
 #include <malloc.h>
 #endif
-    
+
 namespace node {
 
   using namespace v8;
@@ -73,12 +72,10 @@ namespace node {
       // XXX disable provider here
       delete probes;
     }
-    
+
   private:
     static Persistent<FunctionTemplate> constructor_template;
-  };  
-  
+  };
+
   void InitDTraceProvider(v8::Handle<v8::Object> target);
 }
-
-#endif // _HAVE_DTRACE

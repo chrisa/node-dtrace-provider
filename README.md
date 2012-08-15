@@ -76,6 +76,14 @@ supported by this module. See libusdt's status at:
 
   https://github.com/chrisa/libusdt#readme
 
+FreeBSD is supported in principle but is restricted to only 4 working
+arguments per probe.
+
+Platforms not supporting DTrace (notably, Linux and Windows) may
+install this module without building libusdt, with a stub no-op
+implementation provided for compatibility. This allows cross-platform
+npm modules to embed probes and include a dependency on this module.
+
 ## LIMITATIONS
  
 The data types supported are "int" and "char *". Support for

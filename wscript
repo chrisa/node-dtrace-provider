@@ -4,7 +4,7 @@ from os.path import exists, islink
 
 srcdir = '.'
 blddir = 'build'
-VERSION = '0.1.1'
+VERSION = '0.2.0'
 
 libusdtdir = 'libusdt' 
 
@@ -14,13 +14,11 @@ def set_options(ctx):
 def configure(ctx):
     ctx.check_tool('compiler_cxx')
     ctx.check_tool('node_addon')
-    if sys.platform.startswith("sunos") or sys.platform.startswith("darwin"):
-        ctx.env.append_value('CXXFLAGS', ['-D_HAVE_DTRACE'])
 
 def build(ctx):
-    if sys.platform.startswith("sunos") or sys.platform.startswith("darwin"):
+    if sys.platform.startswith("sunos") or sys.platform.startswith("darwin") or sys.platform.startswith("freebsd"):
         ctx.new_task_gen(
-            rule = "cd ../" + libusdtdir + " && make clean all && cd -",
+            rule = "cd ../" + libusdtdir + " && ARCH=i386 make clean all && cd -",
             shell = True
             )
         
@@ -30,13 +28,3 @@ def build(ctx):
         t.includes = [libusdtdir]
         t.staticlib = 'usdt'
         t.libpath = "../" + libusdtdir
-        
-def shutdown():
-    t = 'DTraceProviderBindings.node'
-    if Options.commands['clean']:
-       if exists(t): unlink(t)
-    if Options.commands['build']:
-       if exists('build/default/' + t) and not exists(t):
-       	  symlink('build/default/' + t, t)
-       if exists('build/Release/' + t) and not exists(t):
-          symlink('build/Release/' + t, t)
