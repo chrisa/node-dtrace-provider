@@ -3,8 +3,6 @@
 
 #include <node.h>
 
-#ifdef _HAVE_DTRACE
-
 namespace node {
   
   using namespace v8;
@@ -68,11 +66,11 @@ namespace node {
     void *argv[USDT_ARG_MAX];
 
     // limit argc to the defined number of probe args
-    int argc = a->Length();
+    size_t argc = a->Length();
     if (argc > this->probedef->argc)
       argc = this->probedef->argc;
     
-    for (int i = 0; i < argc; i++) {
+    for (size_t i = 0; i < argc; i++) {
       if (this->probedef->types[i] == USDT_ARGTYPE_STRING) {
 	// char *
 	String::AsciiValue str(a->Get(i)->ToString());
@@ -94,5 +92,3 @@ namespace node {
   }
 
 } // namespace node
-
-#endif // _HAVE_DTRACE
