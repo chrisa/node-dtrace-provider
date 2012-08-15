@@ -80,7 +80,11 @@ namespace node {
       }
       else {
 	// int
-	argv[i] = (void *)(int) a->Get(i)->ToInteger()->Value();
+#ifdef __x86_64__
+	argv[i] = (void *)(long) a->Get(i)->ToInteger()->Value();
+#else
+	argv[i] = (void *)(int) a->Get(i)->ToInt32()->Value();
+#endif        
       }
     }
 
