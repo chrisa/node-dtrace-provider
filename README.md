@@ -26,11 +26,27 @@ Here's a simple example of creating a provider:
     var d = require('dtrace-provider');
 
     var dtp = d.createDTraceProvider("nodeapp");
-    dtp.addProbe("probe1", "int", "int");
-    dtp.addProbe("probe2", "char *");
+    var p1 = dtp.addProbe("probe1", "int", "int");
+    var p2 = dtp.addProbe("probe2", "char *");
     dtp.enable();	   
-    dtp.fire("probe1", function() { return [1, 2]; });
-    dtp.fire("probe2", function() { return ["hello, dtrace"]; });
+
+Probes may be fired via the provider object:
+
+    dtp.fire("probe1", function(p) {
+        return [1, 2];
+    });
+    dtp.fire("probe2", function(p) { 
+        return ["hello, dtrace via provider", "foo"];
+    });
+
+or via the probe objects themselves:
+
+    p1.fire(function(p) {
+      return [1, 2, 3, 4, 5, 6];
+    });
+    p2.fire(function(p) {
+      return ["hello, dtrace via probe", "foo"];
+    });
 
 This example creates a provider called "nodeapp", and adds two
 probes. It then enables the provider, at which point the provider
@@ -49,36 +65,38 @@ The probes are then fired, which produces this output:
 Arguments are captured by a callback only executed when the probe is
 enabled. This means you can do more expensive work to gather arguments.
 
+The maximum number of arguments supported is 32. 
+
 ## PLATFORM SUPPORT
 
-The nature of this extension means that support must be added for each
-platform. Right now that support is only in place for OS X, 64 bit and
-Solaris, 32 bit.
+This libusdt-based Node.JS module supports 64 and 32 bit processes on
+Mac OS X and Solaris-like systems such as Illumos or SmartOS. As more
+platform support is added to libusdt, those platforms will be
+supported by this module. See libusdt's status at:
+
+  https://github.com/chrisa/libusdt#readme
+
+FreeBSD is supported in principle but is restricted to only 4 working
+arguments per probe.
+
+Platforms not supporting DTrace (notably, Linux and Windows) may
+install this module without building libusdt, with a stub no-op
+implementation provided for compatibility. This allows cross-platform
+npm modules to embed probes and include a dependency on this module.
 
 ## LIMITATIONS
-
-The maximum number of probe arguments is 6. There's scope to increase
-this, with some extra complexity in the platform-specific code.
  
-The data types supported are "int" and "char *". There's definitely
-scope to improve this, with more elaborate argument handling - see
-TODO.md
-
-You can only create a provider once - although you don't have to do it
-immediately, once you've set up a provider you can't change its
-definition. It should be possible to enable updates - again, see
-TODO.md.
+The data types supported are "int" and "char *". Support for
+structured types is planned, depending on support from the host DTrace
+implementation for the necessary translators. 
 
 ## CAVEATS
 
-Performance is not where it should be, most especially the
-disabled-probe effect. Probes are already using the "is-enabled"
-feature of DTrace to control execution of the arguments-gathering
-callback, but too much work needs to be done before that's
-checked. That being said, unless your (disabled) probes are
-insanely hot, this shouldn't be a problem.
-
-Please see TODO.md for the details. 
+There is some overhead to probes, even when disabled. Probes are
+already using the "is-enabled" feature of DTrace to control execution
+of the arguments-gathering callback, but some work still needs to be
+done before that's checked. This overhead should not be a problem
+unless probes are placed in particularly hot code paths.
 
 ## CONTRIBUTING
 

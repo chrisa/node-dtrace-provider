@@ -4,7 +4,9 @@ from os.path import exists, islink
 
 srcdir = '.'
 blddir = 'build'
-VERSION = '0.0.9'
+VERSION = '0.2.0'
+
+libusdtdir = 'libusdt' 
 
 def set_options(ctx):
     ctx.tool_options('compiler_cxx')
@@ -12,28 +14,17 @@ def set_options(ctx):
 def configure(ctx):
     ctx.check_tool('compiler_cxx')
     ctx.check_tool('node_addon')
-    if sys.platform.startswith("sunos") or sys.platform.startswith("darwin"):
-        ctx.env.append_value('CXXFLAGS', ['-D_HAVE_DTRACE'])
-    if sys.platform.startswith("darwin"):
-        ctx.env.append_value('CXXFLAGS', ['-m64'])
-        ctx.env.LINKFLAGS = ['-arch', 'x86_64']
 
 def build(ctx):
-    if sys.platform.startswith("sunos") or sys.platform.startswith("darwin"):
+    if sys.platform.startswith("sunos") or sys.platform.startswith("darwin") or sys.platform.startswith("freebsd"):
+        ctx.new_task_gen(
+            rule = "cd ../" + libusdtdir + " && ARCH=i386 make clean all && cd -",
+            shell = True
+            )
+        
         t = ctx.new_task_gen('cxx', 'shlib', 'node_addon')
         t.target = 'DTraceProviderBindings'
-        t.source = ['dtrace_provider.cc', 'dtrace_dof.cc']
-        if sys.platform.startswith("sunos"):
-            t.source.append('solaris-i386/dtrace_probe.cc')
-        elif sys.platform.startswith("darwin"):
-            t.source.append('darwin-x86_64/dtrace_probe.cc')
-
-def shutdown():
-    t = 'DTraceProviderBindings.node'
-    if Options.commands['clean']:
-       if exists(t): unlink(t)
-    if Options.commands['build']:
-       if exists('build/default/' + t) and not exists(t):
-          symlink('build/default/' + t, t)
-       if exists('build/Release/' + t) and not exists(t):
-          symlink('build/Release/' + t, t)
+        t.source = ['dtrace_provider.cc', 'dtrace_probe.cc']
+        t.includes = [libusdtdir]
+        t.staticlib = 'usdt'
+        t.libpath = "../" + libusdtdir
