@@ -3,37 +3,7 @@
         {
             'target_name': 'DTraceProviderBindings',
             'conditions': [
-                ['OS=="mac"', {
-                    'sources': [
-	                'dtrace_provider.cc',
-	                'dtrace_probe.cc',
-                    ],
-                    'include_dirs': [
-	                'libusdt'
-                    ],
-                    'dependencies': [
-                        'libusdt'
-                    ],
-                    'libraries': [
-                        '-L <(module_root_dir)/libusdt -l usdt'
-                    ]
-                }],
-                ['OS=="solaris"', {
-                    'sources': [
-	                'dtrace_provider.cc',
-	                'dtrace_probe.cc',
-                    ],
-                    'include_dirs': [
-	                'libusdt'
-                    ],
-                    'dependencies': [
-                        'libusdt'
-                    ],
-                    'libraries': [
-                        '-L <(module_root_dir)/libusdt -l usdt'
-                    ]
-                }],
-                ['OS=="freebsd"', {
+                ['OS=="mac" or OS=="solaris" or OS=="freebsd"', {
                     'sources': [
 	                'dtrace_provider.cc',
 	                'dtrace_probe.cc',
@@ -53,14 +23,18 @@
         {
             'target_name': 'libusdt',
             'type': 'none',
-            'actions': [{
-                'inputs': [''],
-                'outputs': [''],
-                'action_name': 'build_libusdt',
-		'action': [
-                    'sh', 'libusdt-build.sh'
-		]
-	    }]
+            'conditions': [
+                ['OS=="mac" or OS=="solaris" or OS=="freebsd"', {
+                    'actions': [{
+                        'inputs': [''],
+                        'outputs': [''],
+                        'action_name': 'build_libusdt',
+	      	        'action': [
+                            'sh', 'libusdt-build.sh'
+		        ]
+	            }]
+                }]
+            ]
         }
     ]
 }
