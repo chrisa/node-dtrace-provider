@@ -88,7 +88,7 @@ namespace node {
 
     usdt_fire_probe(this->probedef->probe, argc, argv);
 
-    return Undefined();
+    return True();
   }
 
 } // namespace node

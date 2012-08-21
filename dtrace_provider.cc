@@ -19,7 +19,9 @@ namespace node {
     constructor_template->SetClassName(String::NewSymbol("DTraceProvider"));
 
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "addProbe", DTraceProvider::AddProbe);
+    NODE_SET_PROTOTYPE_METHOD(constructor_template, "removeProbe", DTraceProvider::RemoveProbe);
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "enable", DTraceProvider::Enable);
+    NODE_SET_PROTOTYPE_METHOD(constructor_template, "disable", DTraceProvider::Disable);
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "fire", DTraceProvider::Fire);
 
     target->Set(String::NewSymbol("DTraceProvider"), constructor_template->GetFunction());
@@ -53,16 +55,18 @@ namespace node {
     const char *types[USDT_ARG_MAX];
     int argc = 0;
 
-    DTraceProvider *provider = ObjectWrap::Unwrap<DTraceProvider>(args.Holder());
+    Handle<Object> obj = args.Holder();
+    DTraceProvider *provider = ObjectWrap::Unwrap<DTraceProvider>(obj);
 
     // create a DTraceProbe object
     Handle<Function> klass = DTraceProbe::constructor_template->GetFunction();
-    Handle<Value> pd = Persistent<Value>::New(klass->NewInstance());
+    Handle<Object> pd = Persistent<Object>::New(klass->NewInstance());
 
-    // append to probe list
+    // store in provider object
     DTraceProbe *probe = ObjectWrap::Unwrap<DTraceProbe>(pd->ToObject());
-    String::AsciiValue name(args[0]->ToString());
+    obj->Set(args[0]->ToString(), pd);
 
+    // add probe to provider
     for (int i = 0; i < USDT_ARG_MAX; i++) {
       if (i < args.Length() - 1) {
         String::AsciiValue type(args[i + 1]->ToString());
@@ -70,19 +74,29 @@ namespace node {
         argc++;
       }
     }
-
+    String::AsciiValue name(args[0]->ToString());
     probe->probedef = usdt_create_probe(*name, *name, argc, types);
     usdt_provider_add_probe(provider->provider, probe->probedef);
-
-    if (provider->probes == NULL)
-      provider->probes = probe;
-    else {
-      DTraceProbe *p;
-      for (p = provider->probes; (p->next != NULL); p = p->next) ;
-      p->next = probe;
-    }
     
     return pd;
+  }
+
+  Handle<Value> DTraceProvider::RemoveProbe(const Arguments& args) {
+    HandleScope scope;
+
+    Handle<Object> provider_obj = args.Holder();
+    DTraceProvider *provider = ObjectWrap::Unwrap<DTraceProvider>(provider_obj);
+
+    Handle<Object> probe_obj = Local<Object>::Cast(args[0]);
+    DTraceProbe *probe = ObjectWrap::Unwrap<DTraceProbe>(probe_obj);
+    
+    Handle<String> name = String::New(probe->probedef->name);
+    provider_obj->Delete(name);
+
+    if (usdt_provider_remove_probe(provider->provider, probe->probedef) != 0)
+      return ThrowException(Exception::Error(String::New(usdt_errstr(provider->provider))));
+
+    return True();
   }
 
   Handle<Value> DTraceProvider::Enable(const Arguments& args) {
@@ -95,9 +109,18 @@ namespace node {
     return Undefined();
   }
 
-  Handle<Value> DTraceProvider::Fire(const Arguments& args) {
+  Handle<Value> DTraceProvider::Disable(const Arguments& args) {
     HandleScope scope;
     DTraceProvider *provider = ObjectWrap::Unwrap<DTraceProvider>(args.Holder());
+
+    if (usdt_provider_disable(provider->provider) != 0)
+      return ThrowException(Exception::Error(String::New(usdt_errstr(provider->provider))));
+
+    return Undefined();
+  }
+
+  Handle<Value> DTraceProvider::Fire(const Arguments& args) {
+    HandleScope scope;
 
     if (!args[0]->IsString()) {
       return ThrowException(Exception::Error(String::New(
@@ -109,21 +132,15 @@ namespace node {
         "Must give probe value callback as second argument")));
     }
 
-    String::AsciiValue probe_name(args[0]->ToString());
+    Handle<Object> provider = args.Holder();
+    Handle<Object> probe = Local<Object>::Cast(provider->Get(args[0]));
 
-    // find the probe we should be firing
-    DTraceProbe *p;
-    for (p = provider->probes; p != NULL; p = p->next) {
-      if (!strcmp(p->probedef->name, *probe_name)) {
-        break;
-      }
-    }
-    if (p == NULL) {
+    DTraceProbe *p = ObjectWrap::Unwrap<DTraceProbe>(probe);
+    if (p == NULL)
       return Undefined();
-    }
 
     p->_fire(args[1]);
-    
+
     return True();
   }
 

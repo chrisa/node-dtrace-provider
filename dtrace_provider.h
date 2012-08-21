@@ -29,7 +29,6 @@ namespace node {
   public:
     static void Initialize(v8::Handle<v8::Object> target);
     usdt_probedef_t *probedef;
-    DTraceProbe *next;
 
     static v8::Handle<v8::Value> New(const v8::Arguments& args);
     static v8::Handle<v8::Value> Fire(const v8::Arguments& args);
@@ -39,13 +38,10 @@ namespace node {
     static Persistent<FunctionTemplate> constructor_template;
 
     DTraceProbe() : ObjectWrap() {
-      next = NULL;
+      probedef = NULL;
     }
 
-    uint8_t Argc();
-
     ~DTraceProbe() {
-      delete next;
     }
 
   private:
@@ -56,21 +52,20 @@ namespace node {
   public:
     static void Initialize(v8::Handle<v8::Object> target);
     usdt_provider_t *provider;
-    DTraceProbe *probes;
 
     static v8::Handle<v8::Value> New(const v8::Arguments& args);
     static v8::Handle<v8::Value> AddProbe(const v8::Arguments& args);
+    static v8::Handle<v8::Value> RemoveProbe(const v8::Arguments& args);
     static v8::Handle<v8::Value> Enable(const v8::Arguments& args);
+    static v8::Handle<v8::Value> Disable(const v8::Arguments& args);
     static v8::Handle<v8::Value> Fire(const v8::Arguments& args);
 
     DTraceProvider() : ObjectWrap() {
-      probes = NULL;
       provider = NULL;
     }
 
     ~DTraceProvider() {
-      // XXX disable provider here
-      delete probes;
+      usdt_provider_disable(provider);
     }
 
   private:
