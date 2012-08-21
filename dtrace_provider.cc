@@ -24,9 +24,7 @@ namespace node {
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "disable", DTraceProvider::Disable);
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "fire", DTraceProvider::Fire);
 
-    NODE_SET_PROTOTYPE_METHOD(t, "addProbe", DTraceProvider::AddProbe);
-    NODE_SET_PROTOTYPE_METHOD(t, "enable", DTraceProvider::Enable);
-    NODE_SET_PROTOTYPE_METHOD(t, "fire", DTraceProvider::Fire);
+    target->Set(String::NewSymbol("DTraceProvider"), constructor_template->GetFunction());
 
     DTraceProbe::Initialize(target);
   }
@@ -34,6 +32,8 @@ namespace node {
   Handle<Value> DTraceProvider::New(const Arguments& args) {
     HandleScope scope;
     DTraceProvider *p = new DTraceProvider();
+
+    p->Wrap(args.This());
 
     if (args.Length() != 1 || !args[0]->IsString()) {
       return ThrowException(Exception::Error(String::New(
@@ -47,7 +47,6 @@ namespace node {
         "usdt_create_provider failed")));
     }
 
-    p->Wrap(args.Holder());
     return args.This();
   }
 
