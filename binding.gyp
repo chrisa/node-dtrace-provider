@@ -15,7 +15,7 @@
                         'libusdt'
                     ],
                     'libraries': [
-                        '-L <(module_root_dir)/libusdt -l usdt'
+                        '-L<(module_root_dir)/libusdt -l usdt'
                     ]
                 }]
             ]

@@ -3,6 +3,9 @@ dtrace-provider - Changes
 
 ## HISTORY
 
+ * 0.2.1:
+   Update binding.gyp for clang on Snow Leopard - no space after -L.
+
  * 0.2.0:
    Update libusdt, and attempt to build it correctly for various platforms.
    Add support for disabling providers and removing probes.
