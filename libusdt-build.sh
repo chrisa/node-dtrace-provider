@@ -14,6 +14,11 @@ ARCH=`node -e "console.log(process.config.variables.target_arch == 'x64' ? 'x86_
 echo "Building libusdt for ${ARCH}"
 export ARCH
 
+# Respect a MAKE variable if set
+if [ -z $MAKE ]; then
+  MAKE=make
+fi
+
 # Build.
 #
-make -C libusdt clean all
+$MAKE -C libusdt clean all
