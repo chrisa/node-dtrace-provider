@@ -3,6 +3,10 @@ dtrace-provider - Changes
 
 ## HISTORY
 
+ * 0.2.4:
+   Improve Node architecture detection to support 0.6.x, and respect
+   npm's prefix when choosing a node binary to use (reported by Trent Mick)
+
  * 0.2.3:
    libusdt update - don't invoke ranlib on SunOS-derived systems
    Disambiguate module name in probe tuple, and optionally allow it to be
