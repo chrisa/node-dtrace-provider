@@ -6,5 +6,6 @@
   "homepage" : "https://github.com/chrisa/node-dtrace-provider#readme",
   "author" : { "name" : "Chris Andrews", "email": "chris@nodnol.org" },
   "main" : "./dtrace-provider.js",
-  "repository" : { "type" : "git", "url" : "http://github.com/chrisa/node-dtrace-provider.git" }
+  "repository" : { "type" : "git", "url" : "http://github.com/chrisa/node-dtrace-provider.git" },
+  "engines": { "node" : ">=0.6" }
 }
