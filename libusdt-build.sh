@@ -4,23 +4,18 @@
 #
 unset MAKEFLAGS
 
-# Attempt to use the appropriate node binary - respect npm if that's
-# how we're being built, otherwise use node from PATH
-if [ -z $npm_config_prefix ]; then
-  NODE=`which node`
-else
-  NODE="$npm_config_prefix/bin/node"
-fi
-echo "Using node: $NODE"
-
 # Ask node what arch it's been built for, and build libusdt to match.
+#
+# We use node from the path; npm will have adjusted PATH for us if
+# necessary, otherwise we assume the user did so when building by
+# hand.
 #
 # (this will need to change at the point that GYP is able to build
 # node extensions universal on the Mac - for now we'll go with x86_64
 # on a 64 bit Mac, because that's the default architecture in that
 # situation).
 #
-ARCH=`$NODE libusdt-arch.js`
+ARCH=`node libusdt-arch.js`
 echo "Building libusdt for ${ARCH}"
 export ARCH
 
