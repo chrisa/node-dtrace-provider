@@ -42,6 +42,7 @@ namespace node {
     }
 
     ~DTraceProbe() {
+      usdt_probe_release(probedef);
     }
 
   private:
@@ -66,6 +67,7 @@ namespace node {
 
     ~DTraceProvider() {
       usdt_provider_disable(provider);
+      usdt_provider_free(provider);
     }
 
   private:
