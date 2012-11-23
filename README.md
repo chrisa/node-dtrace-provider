@@ -107,6 +107,11 @@ The source is available at:
 For issues, please use the Github issue tracker linked to the
 repository. Github pull requests are very welcome. 
 
+## RUNNING THE TESTS
+
+   $ npm install
+   $ sudo ./node_modules/.bin/tap --tap test/*.test.js
+
 ## OTHER IMPLEMENTATIONS
 
 This node extension is derived from the ruby-dtrace gem, via the Perl
