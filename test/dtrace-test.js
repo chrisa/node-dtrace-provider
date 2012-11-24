@@ -4,7 +4,7 @@ exports.dtraceTest = function(setup, dtargv, test) {
     return function(t) {
         setup();
 
-        var dtrace = spawn(dtargv[0], dtargv.slice(1));
+        var dtrace = spawn('/usr/sbin/dtrace', dtargv.slice(1));
         
         var traces = [];
         dtrace.stdout.on('data', function (data) {
@@ -16,6 +16,8 @@ exports.dtraceTest = function(setup, dtargv, test) {
         });
         dtrace.on('exit', function (code) {
             t.notOk(code, 'dtrace exited cleanly');
+        });
+        dtrace.on('close', function () {
             traces = traces.join('').split('\n')
                 .filter(function (t) { return t.trim().length });
             
