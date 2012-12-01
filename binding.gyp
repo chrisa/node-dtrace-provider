@@ -5,8 +5,9 @@
             'conditions': [
                 ['OS=="mac" or OS=="solaris" or OS=="freebsd"', {
                     'sources': [
-	                'dtrace_provider.cc',
-	                'dtrace_probe.cc',
+                        'dtrace_provider.cc',
+                        'dtrace_probe.cc',
+                        'dtrace_argument.cc'
                     ],
                     'include_dirs': [
 	                'libusdt'
