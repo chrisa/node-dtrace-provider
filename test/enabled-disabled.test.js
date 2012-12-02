@@ -11,7 +11,8 @@ test(
             'nodeapp*:::{ printf("%d\\n", arg0); }',
             '-c', format('node %s/enabled-disabled_fire.js', __dirname)
         ],
-        function(t, traces) {
+        function(t, exit_code, traces) {
+            t.notOk(exit_code, 'dtrace exited cleanly');
             t.equal(traces.length, 12);
             for (var i = 0; i < 10; i++) {
                 t.equal(traces[i], [i].toString());

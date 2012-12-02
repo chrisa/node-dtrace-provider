@@ -31,7 +31,8 @@ test(
          dscript,
          '-c', format('node %s/32probe-char_fire.js', __dirname)
         ],
-        function(t, traces) {
+        function(t, exit_code, traces) {
+            t.notOk(exit_code, 'dtrace exited cleanly');
             t.equal(traces.length, 1);
 
             var letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',

@@ -11,7 +11,8 @@ test(
             'nodeapp$target:::{ printf("%d %d\\n", epid, arg0); }',
             '-c', format('node %s/enabledagain_fire.js', __dirname)
         ],
-        function(t, traces) {
+        function(t, exit_code, traces) {
+            t.notOk(exit_code, 'dtrace exited cleanly');
             t.equal(traces.length, 2, 'got 2 traces');
             
             var i = 1;
