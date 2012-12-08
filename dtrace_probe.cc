@@ -15,6 +15,7 @@ namespace node {
     for (size_t i = 0; i < argc; i++) {
       delete(this->arguments[i]);
     }
+    usdt_probe_release(probedef);
   }
 
   Persistent<FunctionTemplate> DTraceProbe::constructor_template;

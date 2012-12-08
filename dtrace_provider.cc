@@ -13,7 +13,8 @@ namespace node {
   }
   
   DTraceProvider::~DTraceProvider() {
-      usdt_provider_disable(provider);
+    usdt_provider_disable(provider);
+    usdt_provider_free(provider);
   }
 
   Persistent<FunctionTemplate> DTraceProvider::constructor_template;
@@ -86,7 +87,7 @@ namespace node {
 
     // create a DTraceProbe object
     Handle<Function> klass = DTraceProbe::constructor_template->GetFunction();
-    Handle<Object> pd = Persistent<Object>::New(klass->NewInstance());
+    Handle<Object> pd = Local<Object>::New(klass->NewInstance());
 
     // store in provider object
     DTraceProbe *probe = ObjectWrap::Unwrap<DTraceProbe>(pd->ToObject());

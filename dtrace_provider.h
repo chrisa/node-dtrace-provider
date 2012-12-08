@@ -93,7 +93,6 @@ namespace node {
 
     DTraceProvider();
     ~DTraceProvider();
-
   private:
     static Persistent<FunctionTemplate> constructor_template;
   };

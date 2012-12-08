@@ -14,6 +14,7 @@ test(
         function(t, exit_code, traces) {
             t.notOk(exit_code, 'dtrace exited cleanly');
             t.equal(traces.length, 12);
+            traces.sort(function(a, b) { return a - b });
             for (var i = 0; i < 10; i++) {
                 t.equal(traces[i], [i].toString());
             }
