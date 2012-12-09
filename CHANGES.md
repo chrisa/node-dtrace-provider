@@ -3,6 +3,13 @@ dtrace-provider - Changes
 
 ## HISTORY
 
+ * 0.2.5:
+   Add "json" probe argument type, automatically serialising objects as JSON
+   Trust npm to set PATH appropriately when invoking node (reported by Dave Pacheco)
+   libusdt update - allow provider memory to be freed (reported by Bryan Cantrill)
+   Build libusdt with gmake by default (reported by Keith Wesolowski)
+   Turn the various scripts in test/ into a TAP-based testsuite.
+
  * 0.2.4:
    Improve Node architecture detection to support 0.6.x, and respect
    npm's prefix when choosing a node binary to use (reported by Trent Mick)
