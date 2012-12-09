@@ -80,7 +80,6 @@ namespace node {
   Handle<Value> DTraceProvider::AddProbe(const Arguments& args) {
     HandleScope scope;
     const char *types[USDT_ARG_MAX];
-    int argc = 0;
 
     Handle<Object> obj = args.Holder();
     DTraceProvider *provider = ObjectWrap::Unwrap<DTraceProvider>(obj);
@@ -108,15 +107,15 @@ namespace node {
           probe->arguments[i] = new DTraceStringArgument();
 
         types[i] = strdup(probe->arguments[i]->Type());
-        argc++;
+        probe->argc++;
       }
     }
 
     String::AsciiValue name(args[0]->ToString());
-    probe->probedef = usdt_create_probe(*name, *name, argc, types);
+    probe->probedef = usdt_create_probe(*name, *name, probe->argc, types);
     usdt_provider_add_probe(provider->provider, probe->probedef);
 
-    for (int i = 0; i < argc; i++) {
+    for (size_t i = 0; i < probe->argc; i++) {
       free((char *)types[i]);
     }
 

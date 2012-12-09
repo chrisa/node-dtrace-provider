@@ -9,12 +9,17 @@ namespace node {
 
   // Integer Argument
 
-  void * DTraceIntegerArgument::ArgumentValue(Handle<Value> value) {
 #ifdef __x86_64__
-    return (void *)(long) value->ToInteger()->Value();
+# define INTMETHOD ToInteger()
 #else
-    return (void *)(int) value->ToInt32()->Value();
+# define INTMETHOD ToInt32()
 #endif
+
+  void * DTraceIntegerArgument::ArgumentValue(Handle<Value> value) {
+    if (value->IsUndefined())
+      return 0;
+    else
+      return (void *)(long) value->INTMETHOD->Value();
   }
 
   void DTraceIntegerArgument::FreeArgument(void *arg) {
@@ -27,6 +32,9 @@ namespace node {
   // String Argument
 
   void * DTraceStringArgument::ArgumentValue(Handle<Value> value) {
+    if (value->IsUndefined())
+      return (void *) strdup("undefined");
+
     String::AsciiValue str(value->ToString());
     return (void *) strdup(*str);
   }
@@ -59,6 +67,9 @@ namespace node {
 
   void * DTraceJsonArgument::ArgumentValue(Handle<Value> value) {
     HandleScope scope;
+
+    if (value->IsUndefined())
+      return (void *) strdup("undefined");
 
     Handle<Value> args[1];
     args[0] = value;

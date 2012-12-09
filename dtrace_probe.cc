@@ -6,15 +6,15 @@
 namespace node {
 
   using namespace v8;
-  
+
   DTraceProbe::DTraceProbe() : ObjectWrap() {
+    argc = 0;
     probedef = NULL;
   }
-  
+
   DTraceProbe::~DTraceProbe() {
-    for (size_t i = 0; i < argc; i++) {
+    for (size_t i = 0; i < argc; i++)
       delete(this->arguments[i]);
-    }
     usdt_probe_release(probedef);
   }
 
@@ -75,11 +75,6 @@ namespace node {
 
     Local<Array> a = Local<Array>::Cast(probe_args);
     void *argv[USDT_ARG_MAX];
-
-    // limit argc to the defined number of probe args
-    argc = a->Length();
-    if (argc > this->probedef->argc)
-      argc = this->probedef->argc;
 
     // convert each argument value
     for (size_t i = 0; i < argc; i++) {

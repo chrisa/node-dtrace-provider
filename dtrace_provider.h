@@ -26,10 +26,10 @@ namespace node {
 
   class DTraceArgument {
   public:
-    virtual const char *Type();
-    virtual void *ArgumentValue(Handle<Value>);
-    virtual void FreeArgument(void *);
-    virtual ~DTraceArgument();
+    virtual const char *Type() = 0;
+    virtual void *ArgumentValue(Handle<Value>) = 0;
+    virtual void FreeArgument(void *) = 0;
+    virtual ~DTraceArgument() { };
   };
 
   class DTraceIntegerArgument : public DTraceArgument {
