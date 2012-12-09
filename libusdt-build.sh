@@ -21,7 +21,7 @@ export ARCH
 
 # Respect a MAKE variable if set
 if [ -z $MAKE ]; then
-  MAKE=make
+  MAKE=gmake
 fi
 
 # Build.
