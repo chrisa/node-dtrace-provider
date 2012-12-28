@@ -21,7 +21,12 @@ export ARCH
 
 # Respect a MAKE variable if set
 if [ -z $MAKE ]; then
-  MAKE=gmake
+  # Default to `gmake` first if available, because we require GNU make
+  # and `make` isn't GNU make on some plats.
+  MAKE=`which gmake`
+  if [ -z $MAKE ]; then
+    MAKE=make
+  fi
 fi
 
 # Build.
