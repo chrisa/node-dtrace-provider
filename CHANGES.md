@@ -3,6 +3,10 @@ dtrace-provider - Changes
 
 ## HISTORY
 
+ * 0.2.6:
+   Fall back to make(1) if gmake(1) is unavailable, still expected to be GNU Make
+   (Trent Mick)
+
  * 0.2.5:
    Add "json" probe argument type, automatically serialising objects as JSON
    Trust npm to set PATH appropriately when invoking node (reported by Dave Pacheco)

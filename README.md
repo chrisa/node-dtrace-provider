@@ -108,6 +108,9 @@ install this module without building libusdt, with a stub no-op
 implementation provided for compatibility. This allows cross-platform
 npm modules to embed probes and include a dependency on this module.
 
+GNU Make is required to build libusdt; the build scripts will look for
+gmake in PATH first, and then for make.
+
 ## CAVEATS
 
 There is some overhead to probes, even when disabled. Probes are
