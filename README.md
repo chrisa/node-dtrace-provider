@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/chrisa/node-dtrace-provider.png)](http://travis-ci.org/chrisa/node-dtrace-provider)
 # dtrace-provider - Native DTrace providers for Node.js apps.
 
 This extension allows you to create native DTrace providers for your
