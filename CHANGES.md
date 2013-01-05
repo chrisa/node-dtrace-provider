@@ -3,6 +3,9 @@ dtrace-provider - Changes
 
 ## HISTORY
 
+ * 0.2.7:
+   Don't build on FreeBSD by default - DTrace is not yet built in releases.
+
  * 0.2.6:
    Fall back to make(1) if gmake(1) is unavailable, still expected to be GNU Make
    (Trent Mick)
