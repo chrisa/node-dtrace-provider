@@ -190,4 +190,5 @@ namespace node {
     DTraceProvider::Initialize(target);
   }
 
+  NODE_MODULE(DTraceProviderBindings, init)
 } // namespace node
