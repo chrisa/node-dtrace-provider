@@ -3,6 +3,11 @@ dtrace-provider - Changes
 
 ## HISTORY
 
+ * 0.2.8:
+   Add NODE_MODULE() declaration for compatibility with Node 0.9.1+
+   (reported by Trent Mick)
+   Remove execSync dependency from tests.
+
  * 0.2.7:
    Don't build on FreeBSD by default - DTrace is not yet built in releases.
 

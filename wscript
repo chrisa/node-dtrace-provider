@@ -4,7 +4,7 @@ from os.path import exists, islink
 
 srcdir = '.'
 blddir = 'build'
-VERSION = '0.2.7'
+VERSION = '0.2.8'
 
 libusdtdir = 'libusdt' 
 
