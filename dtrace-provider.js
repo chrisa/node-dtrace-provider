@@ -35,6 +35,6 @@ if (!DTraceProvider) {
 exports.DTraceProvider = DTraceProvider;
 exports.createDTraceProvider = function(name, module) {
     if (arguments.length == 2)
-        return (new DTraceProvider(name, module));
-    return (new DTraceProvider(name));
+        return (new exports.DTraceProvider(name, module));
+    return (new exports.DTraceProvider(name));
 };
