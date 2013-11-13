@@ -15,6 +15,9 @@ extern "C" {
 #include <fcntl.h>
 #include <unistd.h>
 
+#include <string>
+#include <utility>
+
 #ifndef __APPLE__
 #include <stdlib.h>
 #include <malloc.h>
@@ -90,10 +93,12 @@ namespace node {
     static v8::Handle<v8::Value> Enable(const v8::Arguments& args);
     static v8::Handle<v8::Value> Disable(const v8::Arguments& args);
     static v8::Handle<v8::Value> Fire(const v8::Arguments& args);
-
+    static v8::Handle<v8::Value> NamesFromGuid(const v8::Arguments& args);
+    
     DTraceProvider();
     ~DTraceProvider();
   private:
+    static bool GenerateNamesFromGuid(std::string guid, std::pair<std::string, std::string>& result);
     static Persistent<FunctionTemplate> constructor_template;
   };
 

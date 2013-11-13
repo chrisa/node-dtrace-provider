@@ -1,0 +1,17 @@
+32probe_fire
+32probe-char_fire
+added-again_fire
+add-probes_fire
+basic_fire
+cleaning-after-fire
+disabledagain_fire
+enabledagain_fire
+enabled-disabled_fire
+fewer-args_fire
+fewer-args-json_fire
+firing-without-enabling
+json-args_fire
+more-args_fire
+multiple-json-args_fire
+removed_fire
+types_testing

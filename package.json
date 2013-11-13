@@ -1,13 +1,19 @@
 {
     "name" : "dtrace-provider",
     "version" : "0.2.8",
-    "description" : "Native DTrace providers for node.js applications",
-    "keywords" : ["dtrace"],
+    "description" : "Native trace providers for node.js applications",
+    "keywords" : ["ETW", "dtrace", "probe"],
     "homepage" : "https://github.com/chrisa/node-dtrace-provider#readme",
     "author" : {
         "name" : "Chris Andrews",
         "email": "chris@nodnol.org"
     },
+    "contributors" : [ {
+        "name" : "Alexey Ignashin",
+        "email": "alexey.ignashin@akvelon.com" }, {
+        "name" : "Henry Rawas",
+        "email": "henryr@schakra.com" }
+    ],
     "repository" : {
         "type" : "git",
         "url" : "http://github.com/chrisa/node-dtrace-provider.git"
