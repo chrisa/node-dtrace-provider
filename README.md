@@ -81,7 +81,7 @@ is available whether or not the platform supports it.
     var dtp = d.createDTraceProvider("nodeapp");
     var p1 = dtp.addProbe("j1", "json");
     dtp.enable();
-    p1.fire(function() { return { "foo" => "bar" }; });
+    p1.fire(function() { return { "foo": "bar" }; });
 
     # on a platform supporting json():
 
