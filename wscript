@@ -23,8 +23,8 @@ def build(ctx):
             )
         
         t = ctx.new_task_gen('cxx', 'shlib', 'node_addon')
-        t.target = 'DTraceProviderBindings'
-        t.source = ['dtrace_provider.cc', 'dtrace_probe.cc', 'dtrace_argument.cc']
+        t.target = 'TraceProviderBindings'
+        t.source = ['src/dtrace/dtrace_provider.cc', 'src/dtrace/dtrace_probe.cc', 'src/dtrace/dtrace_argument.cc']
         t.includes = [libusdtdir]
         t.staticlib = 'usdt'
         t.libpath = "../" + libusdtdir
