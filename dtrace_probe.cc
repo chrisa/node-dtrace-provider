@@ -1,7 +1,5 @@
 #include "dtrace_provider.h"
-#include <v8.h>
-
-#include <node.h>
+#include <nan.h>
 
 namespace node {
 
@@ -21,56 +19,58 @@ namespace node {
   Persistent<FunctionTemplate> DTraceProbe::constructor_template;
 
   void DTraceProbe::Initialize(Handle<Object> target) {
-    HandleScope scope;
+    NanScope();
 
-    Local<FunctionTemplate> t = FunctionTemplate::New(DTraceProbe::New);
-    constructor_template = Persistent<FunctionTemplate>::New(t);
-    constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
-    constructor_template->SetClassName(String::NewSymbol("DTraceProbe"));
+    Local<FunctionTemplate> t = NanNew<FunctionTemplate>(DTraceProbe::New);
+    t->InstanceTemplate()->SetInternalFieldCount(1);
+    t->SetClassName(NanNew<String>("DTraceProbe"));
+    NanAssignPersistent(constructor_template, t);
 
-    NODE_SET_PROTOTYPE_METHOD(constructor_template, "fire", DTraceProbe::Fire);
+    NODE_SET_PROTOTYPE_METHOD(t, "fire", DTraceProbe::Fire);
 
-    target->Set(String::NewSymbol("DTraceProbe"), constructor_template->GetFunction());
+    target->Set(NanNew<String>("DTraceProbe"), t->GetFunction());
   }
 
-  Handle<Value> DTraceProbe::New(const Arguments& args) {
+  NAN_METHOD(DTraceProbe::New) {
+    NanScope();
     DTraceProbe *probe = new DTraceProbe();
     probe->Wrap(args.This());
-    return args.This();
+    NanReturnValue(args.This());
   }
 
-  Handle<Value> DTraceProbe::Fire(const Arguments& args) {
-    HandleScope scope;
+  NAN_METHOD(DTraceProbe::Fire) {
+    NanScope();
     DTraceProbe *pd = ObjectWrap::Unwrap<DTraceProbe>(args.Holder());
-    return pd->_fire(args[0]);
+    NanReturnValue(pd->_fire(args[0]));
   }
 
   Handle<Value> DTraceProbe::_fire(v8::Local<v8::Value> argsfn) {
+    NanScope();
 
     if (usdt_is_enabled(this->probedef->probe) == 0) {
-      return Undefined();
+      return NanUndefined();
     }
 
     // invoke fire callback
     TryCatch try_catch;
 
     if (!argsfn->IsFunction()) {
-      return ThrowException(Exception::Error(String::New(
-        "Must give probe value callback as argument")));
+      NanThrowError("Must give probe value callback as argument");
+      return NanUndefined();
     }
 
     Local<Function> cb = Local<Function>::Cast(argsfn);
-    Local<Value> probe_args = cb->Call(this->handle_, 0, NULL);
+    Local<Value> probe_args = cb->Call(NanObjectWrapHandle(this), 0, NULL);
 
     // exception in args callback?
     if (try_catch.HasCaught()) {
       FatalException(try_catch);
-      return Undefined();
+      return NanUndefined();
     }
 
     // check return
     if (!probe_args->IsArray()) {
-      return Undefined();
+      return NanUndefined();
     }
 
     Local<Array> a = Local<Array>::Cast(probe_args);
@@ -89,7 +89,7 @@ namespace node {
       this->arguments[i]->FreeArgument(argv[i]);
     }
 
-    return True();
+    return NanTrue();
   }
 
 } // namespace node
