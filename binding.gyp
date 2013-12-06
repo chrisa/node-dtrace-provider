@@ -14,7 +14,8 @@
                         'dtrace_argument.cc'
                     ],
                     'include_dirs': [
-	                'libusdt'
+                        'libusdt',
+                        '<!(node -e "require(\'nan\')")'
                     ],
                     'dependencies': [
                         'libusdt'

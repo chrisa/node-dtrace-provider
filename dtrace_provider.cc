@@ -1,7 +1,6 @@
 #include "dtrace_provider.h"
-#include <v8.h>
+#include <nan.h>
 
-#include <node.h>
 #include <stdio.h>
 
 namespace node {
@@ -20,42 +19,42 @@ namespace node {
   Persistent<FunctionTemplate> DTraceProvider::constructor_template;
   
   void DTraceProvider::Initialize(Handle<Object> target) {
-    HandleScope scope;
+    NanScope();
 
     Local<FunctionTemplate> t = FunctionTemplate::New(DTraceProvider::New);
-    constructor_template = Persistent<FunctionTemplate>::New(t);
-    constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
-    constructor_template->SetClassName(String::NewSymbol("DTraceProvider"));
+    t->InstanceTemplate()->SetInternalFieldCount(1);
+    t->SetClassName(NanSymbol("DTraceProvider"));
+    NanAssignPersistent(FunctionTemplate, constructor_template, t);
 
-    NODE_SET_PROTOTYPE_METHOD(constructor_template, "addProbe", DTraceProvider::AddProbe);
-    NODE_SET_PROTOTYPE_METHOD(constructor_template, "removeProbe", DTraceProvider::RemoveProbe);
-    NODE_SET_PROTOTYPE_METHOD(constructor_template, "enable", DTraceProvider::Enable);
-    NODE_SET_PROTOTYPE_METHOD(constructor_template, "disable", DTraceProvider::Disable);
-    NODE_SET_PROTOTYPE_METHOD(constructor_template, "fire", DTraceProvider::Fire);
+    NODE_SET_PROTOTYPE_METHOD(t, "addProbe", DTraceProvider::AddProbe);
+    NODE_SET_PROTOTYPE_METHOD(t, "removeProbe", DTraceProvider::RemoveProbe);
+    NODE_SET_PROTOTYPE_METHOD(t, "enable", DTraceProvider::Enable);
+    NODE_SET_PROTOTYPE_METHOD(t, "disable", DTraceProvider::Disable);
+    NODE_SET_PROTOTYPE_METHOD(t, "fire", DTraceProvider::Fire);
 
-    target->Set(String::NewSymbol("DTraceProvider"), constructor_template->GetFunction());
+    target->Set(NanSymbol("DTraceProvider"), t->GetFunction());
 
     DTraceProbe::Initialize(target);
   }
 
-  Handle<Value> DTraceProvider::New(const Arguments& args) {
-    HandleScope scope;
+  NAN_METHOD(DTraceProvider::New) {
+    NanScope();
     DTraceProvider *p = new DTraceProvider();
     char module[128];
 
     p->Wrap(args.This());
 
     if (args.Length() < 1 || !args[0]->IsString()) {
-      return ThrowException(Exception::Error(String::New(
-        "Must give provider name as argument")));
+      NanThrowTypeError("Must give provider name as argument");
+      NanReturnUndefined();
     }
 
     String::AsciiValue name(args[0]->ToString());
 
     if (args.Length() == 2) {
       if (!args[1]->IsString()) {
-        return ThrowException(Exception::Error(String::New(
-          "Must give module name as argument")));
+        NanThrowTypeError("Must give module name as argument");
+        NanReturnUndefined();
       }
 
       String::AsciiValue mod(args[1]->ToString());
@@ -65,28 +64,29 @@ namespace node {
       // on our address
       (void) snprintf(module, sizeof (module), "mod-%p", p);
     } else {
-      return ThrowException(Exception::Error(String::New(
-        "Expected only provider name and module as arguments")));
+      NanThrowError("Expected only provider name and module as arguments");
+      NanReturnUndefined();
     }
 
     if ((p->provider = usdt_create_provider(*name, module)) == NULL) {
-      return ThrowException(Exception::Error(String::New(
-        "usdt_create_provider failed")));
+      NanThrowError("usdt_create_provider failed");
+      NanReturnUndefined();
     }
 
-    return args.This();
+    NanReturnValue(args.This());
   }
 
-  Handle<Value> DTraceProvider::AddProbe(const Arguments& args) {
-    HandleScope scope;
+  NAN_METHOD(DTraceProvider::AddProbe) {
+    NanScope();
     const char *types[USDT_ARG_MAX];
 
     Handle<Object> obj = args.Holder();
     DTraceProvider *provider = ObjectWrap::Unwrap<DTraceProvider>(obj);
 
     // create a DTraceProbe object
-    Handle<Function> klass = DTraceProbe::constructor_template->GetFunction();
-    Handle<Object> pd = Local<Object>::New(klass->NewInstance());
+    Handle<Function> klass =
+        NanPersistentToLocal(DTraceProbe::constructor_template)->GetFunction();
+    Handle<Object> pd = NanNewLocal(klass->NewInstance());
 
     // store in provider object
     DTraceProbe *probe = ObjectWrap::Unwrap<DTraceProbe>(pd->ToObject());
@@ -119,11 +119,11 @@ namespace node {
       free((char *)types[i]);
     }
 
-    return pd;
+    NanReturnValue(pd);
   }
 
-  Handle<Value> DTraceProvider::RemoveProbe(const Arguments& args) {
-    HandleScope scope;
+  NAN_METHOD(DTraceProvider::RemoveProbe) {
+    NanScope();
 
     Handle<Object> provider_obj = args.Holder();
     DTraceProvider *provider = ObjectWrap::Unwrap<DTraceProvider>(provider_obj);
@@ -134,43 +134,49 @@ namespace node {
     Handle<String> name = String::New(probe->probedef->name);
     provider_obj->Delete(name);
 
-    if (usdt_provider_remove_probe(provider->provider, probe->probedef) != 0)
-      return ThrowException(Exception::Error(String::New(usdt_errstr(provider->provider))));
+    if (usdt_provider_remove_probe(provider->provider, probe->probedef) != 0) {
+      NanThrowError(usdt_errstr(provider->provider));
+      NanReturnUndefined();
+    }
 
-    return True();
+    NanReturnValue(True());
   }
 
-  Handle<Value> DTraceProvider::Enable(const Arguments& args) {
-    HandleScope scope;
+  NAN_METHOD(DTraceProvider::Enable) {
+    NanScope();
     DTraceProvider *provider = ObjectWrap::Unwrap<DTraceProvider>(args.Holder());
 
-    if (usdt_provider_enable(provider->provider) != 0)
-      return ThrowException(Exception::Error(String::New(usdt_errstr(provider->provider))));
+    if (usdt_provider_enable(provider->provider) != 0) {
+      NanThrowError(usdt_errstr(provider->provider));
+      NanReturnUndefined();
+    }
 
-    return Undefined();
+    NanReturnUndefined();
   }
 
-  Handle<Value> DTraceProvider::Disable(const Arguments& args) {
-    HandleScope scope;
+  NAN_METHOD(DTraceProvider::Disable) {
+    NanScope();
     DTraceProvider *provider = ObjectWrap::Unwrap<DTraceProvider>(args.Holder());
 
-    if (usdt_provider_disable(provider->provider) != 0)
-      return ThrowException(Exception::Error(String::New(usdt_errstr(provider->provider))));
+    if (usdt_provider_disable(provider->provider) != 0) {
+      NanThrowError(usdt_errstr(provider->provider));
+      NanReturnUndefined();
+    }
 
-    return Undefined();
+    NanReturnUndefined();
   }
 
-  Handle<Value> DTraceProvider::Fire(const Arguments& args) {
-    HandleScope scope;
+  NAN_METHOD(DTraceProvider::Fire) {
+    NanScope();
 
     if (!args[0]->IsString()) {
-      return ThrowException(Exception::Error(String::New(
-        "Must give probe name as first argument")));
+      NanThrowTypeError("Must give probe name as first argument");
+      NanReturnUndefined();
     }
 
     if (!args[1]->IsFunction()) {
-      return ThrowException(Exception::Error(String::New(
-        "Must give probe value callback as second argument")));
+      NanThrowTypeError("Must give probe value callback as second argument");
+      NanReturnUndefined();
     }
 
     Handle<Object> provider = args.Holder();
@@ -178,11 +184,11 @@ namespace node {
 
     DTraceProbe *p = ObjectWrap::Unwrap<DTraceProbe>(probe);
     if (p == NULL)
-      return Undefined();
+      NanReturnUndefined();
 
     p->_fire(args[1]);
 
-    return True();
+    NanReturnValue(True());
   }
 
   extern "C" void
