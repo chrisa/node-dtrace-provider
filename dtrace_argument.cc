@@ -1,7 +1,5 @@
 #include "dtrace_provider.h"
-#include <v8.h>
-
-#include <node.h>
+#include <nan.h>
 
 namespace node {
 
@@ -50,30 +48,31 @@ namespace node {
   // JSON Argument
 
   DTraceJsonArgument::DTraceJsonArgument() {
-    HandleScope scope;
+    NanScope();
     Handle<Context> context = Context::GetCurrent();
     Handle<Object> global = context->Global();
-    Handle<Object> l_JSON = global->Get(String::New("JSON"))->ToObject();
+    Handle<Object> l_JSON = global->Get(NanSymbol("JSON"))->ToObject();
     Handle<Function> l_JSON_stringify
-      = Handle<Function>::Cast(l_JSON->Get(String::New("stringify")));
-    JSON = Persistent<Object>::New(l_JSON);
-    JSON_stringify = Persistent<Function>::New(l_JSON_stringify);
+      = Handle<Function>::Cast(l_JSON->Get(NanSymbol("stringify")));
+    NanAssignPersistent(Object, JSON, l_JSON);
+    NanAssignPersistent(Function, JSON_stringify, l_JSON_stringify);
   }
 
   DTraceJsonArgument::~DTraceJsonArgument() {
-    JSON.Dispose();
-    JSON_stringify.Dispose();
+    NanDispose(JSON);
+    NanDispose(JSON_stringify);
   }
 
   void * DTraceJsonArgument::ArgumentValue(Handle<Value> value) {
-    HandleScope scope;
+    NanScope();
 
     if (value->IsUndefined())
       return (void *) strdup("undefined");
 
     Handle<Value> args[1];
     args[0] = value;
-    Handle<Value> j = JSON_stringify->Call(JSON, 1, args);
+    Handle<Value> j = NanPersistentToLocal(JSON_stringify)->Call(
+          NanPersistentToLocal(JSON), 1, args);
 
     if (*j == NULL)
       return (void *) strdup("{ \"error\": \"stringify failed\" }");

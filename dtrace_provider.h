@@ -1,6 +1,5 @@
-#include <node.h>
+#include <nan.h>
 #include <node_object_wrap.h>
-#include <v8.h>
 
 extern "C" {
 #include <usdt.h>
@@ -58,7 +57,7 @@ namespace node {
     Persistent<Function> JSON_stringify;
   };
 
-  class DTraceProbe : ObjectWrap {
+  class DTraceProbe : public ObjectWrap {
 
   public:
     static void Initialize(v8::Handle<v8::Object> target);
@@ -66,8 +65,8 @@ namespace node {
     size_t argc;
     DTraceArgument *arguments[USDT_ARG_MAX];
 
-    static v8::Handle<v8::Value> New(const v8::Arguments& args);
-    static v8::Handle<v8::Value> Fire(const v8::Arguments& args);
+    static NAN_METHOD(New);
+    static NAN_METHOD(Fire);
 
     Handle<Value> _fire(v8::Local<v8::Value>);
 
@@ -78,18 +77,18 @@ namespace node {
   private:
   };
 
-  class DTraceProvider : ObjectWrap {
+  class DTraceProvider : public ObjectWrap {
 
   public:
     static void Initialize(v8::Handle<v8::Object> target);
     usdt_provider_t *provider;
 
-    static v8::Handle<v8::Value> New(const v8::Arguments& args);
-    static v8::Handle<v8::Value> AddProbe(const v8::Arguments& args);
-    static v8::Handle<v8::Value> RemoveProbe(const v8::Arguments& args);
-    static v8::Handle<v8::Value> Enable(const v8::Arguments& args);
-    static v8::Handle<v8::Value> Disable(const v8::Arguments& args);
-    static v8::Handle<v8::Value> Fire(const v8::Arguments& args);
+    static NAN_METHOD(New);
+    static NAN_METHOD(AddProbe);
+    static NAN_METHOD(RemoveProbe);
+    static NAN_METHOD(Enable);
+    static NAN_METHOD(Disable);
+    static NAN_METHOD(Fire);
 
     DTraceProvider();
     ~DTraceProvider();
