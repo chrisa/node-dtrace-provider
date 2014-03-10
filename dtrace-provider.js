@@ -8,6 +8,7 @@ DTraceProviderStub.prototype.addProbe = function(name) {
 };
 DTraceProviderStub.prototype.enable = function() {};
 DTraceProviderStub.prototype.fire = function() {};
+DTraceProviderStub.prototype.disable = function() {};
 
 var builds = ['Release', 'default', 'Debug'];
 
