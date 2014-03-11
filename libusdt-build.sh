@@ -31,4 +31,7 @@ fi
 
 # Build.
 #
+if [ -d ".git" ]; then
+  git submodule init && git submodule update;
+fi
 $MAKE -C libusdt clean all
