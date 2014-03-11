@@ -32,6 +32,9 @@ fi
 # Build.
 #
 if [ ! -d "libusdt" ]; then
-  git clone "https://github.com/chrisa/libusdt#83e85bf3175e784926f6dfd132f11b223c745543" libusdt
+  git clone "https://github.com/chrisa/libusdt.git" libusdt
+  pushd libusdt
+  git checkout "83e85bf3175e784926f6dfd132f11b223c745543"
+  popd
 fi
 $MAKE -C libusdt clean all
