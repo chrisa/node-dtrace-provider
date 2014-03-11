@@ -31,7 +31,7 @@ fi
 
 # Build.
 #
-if [ -d ".git" ]; then
-  git submodule init && git submodule update;
+if [ ! -d "libusdt" ]; then
+  git clone "https://github.com/chrisa/libusdt#83e85bf3175e784926f6dfd132f11b223c745543" libusdt
 fi
 $MAKE -C libusdt clean all
