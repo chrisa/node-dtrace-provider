@@ -1,10 +1,10 @@
 var DTraceProvider;
 
 function DTraceProviderStub() {}
-DTraceProviderStub.prototype.addProbe = function() {
-    return {
-        'fire': function() { }
-    };
+DTraceProviderStub.prototype.addProbe = function(name) {
+    var p = { 'fire': function () {} };
+    this[name] = p;
+    return (p);
 };
 DTraceProviderStub.prototype.enable = function() {};
 DTraceProviderStub.prototype.fire = function() {};
