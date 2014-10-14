@@ -23,7 +23,7 @@ for (var i in builds) {
         if (process.platform == 'darwin' ||
             process.platform == 'solaris' ||
             process.platform == 'freebsd') {
-            console.log(e);
+            console.error(e);
         }
     }
 }
