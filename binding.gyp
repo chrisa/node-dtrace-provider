@@ -1,6 +1,9 @@
 {
     'conditions': [
         ['OS=="mac" or OS=="solaris"', {
+            'variables': {
+              'escaped_root': '<!(printf %q "<(module_root_dir)")',
+            },
 
             # If we are on the Mac, or a Solaris derivative, attempt
             # to build the DTrace provider extension.
@@ -20,7 +23,7 @@
                         'libusdt'
                     ],
                     'libraries': [
-                        '-L<(module_root_dir)/libusdt -l usdt'
+                        '-L<(escaped_root)/libusdt -l usdt'
                     ]
                 },
                 {
