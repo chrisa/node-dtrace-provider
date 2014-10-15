@@ -1,29 +1,31 @@
 {
-    "name" : "dtrace-provider",
-    "version" : "0.2.8",
-    "description" : "Native DTrace providers for node.js applications",
-    "keywords" : ["dtrace"],
-    "homepage" : "https://github.com/chrisa/node-dtrace-provider#readme",
-    "author" : {
-        "name" : "Chris Andrews",
-        "email": "chris@nodnol.org"
-    },
-    "repository" : {
-        "type" : "git",
-        "url" : "http://github.com/chrisa/node-dtrace-provider.git"
-    },
-    "engines" : {
-        "node" : ">=0.6"
-    },
-    "dependencies" : {
-        "nan" : "~1.3.0"
-    },
-    "devDependencies": {
-        "tap": ">=0.2.0"
-    },
-    "scripts": {
-        "install": "scripts/install.js",
-        "test": "tap test/*test.js"
-    },
-    "main" : "./dtrace-provider.js"
+  "name": "dtrace-provider",
+  "version": "0.3.0",
+  "description": "Native DTrace providers for node.js applications",
+  "keywords": [
+    "dtrace"
+  ],
+  "homepage": "https://github.com/chrisa/node-dtrace-provider#readme",
+  "author": {
+    "name": "Chris Andrews",
+    "email": "chris@nodnol.org"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/chrisa/node-dtrace-provider.git"
+  },
+  "engines": {
+    "node": ">=0.6"
+  },
+  "dependencies": {
+    "nan": "~1.3.0"
+  },
+  "devDependencies": {
+    "tap": ">=0.2.0"
+  },
+  "scripts": {
+    "install": "scripts/install.js",
+    "test": "tap test/*test.js"
+  },
+  "main": "./dtrace-provider.js"
 }
