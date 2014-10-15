@@ -22,7 +22,8 @@
         "tap": ">=0.2.0"
     },
     "scripts": {
-        "install": "scripts/install.js"
+        "install": "scripts/install.js",
+        "test": "tap test/*test.js"
     },
     "main" : "./dtrace-provider.js"
 }
