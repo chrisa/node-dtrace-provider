@@ -15,7 +15,14 @@ fs.renameSync(src, dst);
 
 movedFile = true;
 
-var nodegyp = path.join(process.execPath,
+//npm_execpath: '/usr/local/lib/node_modules/npm/bin/npm-cli.js',
+var nodegyp = path.join(process.env.npm_execpath,
+                        '..',
+                        'node-gyp-bin',
+                        'node-gyp');
+
+if (!fs.existsSync(nodegyp))
+  nodegyp = path.join(process.execPath,
                         '..',
                         '..',
                         'lib',
@@ -24,6 +31,11 @@ var nodegyp = path.join(process.execPath,
                         'bin',
                         'node-gyp-bin',
                         'node-gyp');
+
+if (!fs.existsSync(nodegyp)) {
+  console.error('cannot locate npm install');
+  return;
+}
 
 var spawn = require('child_process').spawn;
 
