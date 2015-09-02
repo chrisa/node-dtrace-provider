@@ -1,6 +1,6 @@
 {
   "name": "dtrace-provider",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Native DTrace providers for node.js applications",
   "keywords": [
     "dtrace"
