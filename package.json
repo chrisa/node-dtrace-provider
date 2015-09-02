@@ -15,13 +15,13 @@
     "url": "http://github.com/chrisa/node-dtrace-provider.git"
   },
   "engines": {
-    "node": ">=0.6"
+    "node": ">=0.10"
   },
   "dependencies": {
-    "nan": "~1.8.4"
+    "nan": "^2.0.8"
   },
   "devDependencies": {
-    "tap": ">=0.2.0"
+    "tap": "^0.2.0"
   },
   "scripts": {
     "install": "node scripts/install.js",

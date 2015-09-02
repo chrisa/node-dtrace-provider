@@ -48,31 +48,31 @@ namespace node {
   // JSON Argument
 
   DTraceJsonArgument::DTraceJsonArgument() {
-    NanScope();
-    Handle<Context> context = NanGetCurrentContext();
+    Nan::HandleScope scope;
+    Handle<Context> context = Nan::GetCurrentContext();
     Handle<Object> global = context->Global();
-    Handle<Object> l_JSON = global->Get(NanNew<String>("JSON"))->ToObject();
+    Handle<Object> l_JSON = global->Get(Nan::New<String>("JSON").ToLocalChecked())->ToObject();
     Handle<Function> l_JSON_stringify
-      = Handle<Function>::Cast(l_JSON->Get(NanNew<String>("stringify")));
-    NanAssignPersistent(JSON, l_JSON);
-    NanAssignPersistent(JSON_stringify, l_JSON_stringify);
+      = Handle<Function>::Cast(l_JSON->Get(Nan::New<String>("stringify").ToLocalChecked()));
+    JSON.Reset(v8::Isolate::GetCurrent(), l_JSON);
+    JSON_stringify.Reset(v8::Isolate::GetCurrent(), l_JSON_stringify);
   }
 
   DTraceJsonArgument::~DTraceJsonArgument() {
-    NanDisposePersistent(JSON);
-    NanDisposePersistent(JSON_stringify);
+    JSON.Reset();
+    JSON_stringify.Reset();
   }
 
   void * DTraceJsonArgument::ArgumentValue(Handle<Value> value) {
-    NanScope();
+    Nan::HandleScope scope;
 
     if (value->IsUndefined())
       return (void *) strdup("undefined");
 
-    Handle<Value> args[1];
-    args[0] = value;
-    Handle<Value> j = NanNew<Function>(JSON_stringify)->Call(
-          NanNew<Object>(JSON), 1, args);
+    Handle<Value> info[1];
+    info[0] = value;
+    Handle<Value> j = Nan::New<Function>(JSON_stringify)->Call(
+          Nan::New<Object>(JSON), 1, info);
 
     if (*j == NULL)
       return (void *) strdup("{ \"error\": \"stringify failed\" }");

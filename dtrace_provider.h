@@ -57,7 +57,7 @@ namespace node {
     Persistent<Function> JSON_stringify;
   };
 
-  class DTraceProbe : public ObjectWrap {
+  class DTraceProbe : public Nan::ObjectWrap {
 
   public:
     static void Initialize(v8::Handle<v8::Object> target);
@@ -77,7 +77,7 @@ namespace node {
   private:
   };
 
-  class DTraceProvider : public ObjectWrap {
+  class DTraceProvider : public Nan::ObjectWrap {
 
   public:
     static void Initialize(v8::Handle<v8::Object> target);
