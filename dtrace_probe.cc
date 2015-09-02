@@ -5,7 +5,7 @@ namespace node {
 
   using namespace v8;
 
-  DTraceProbe::DTraceProbe() : ObjectWrap() {
+  DTraceProbe::DTraceProbe() : Nan::ObjectWrap() {
     argc = 0;
     probedef = NULL;
   }
@@ -16,61 +16,61 @@ namespace node {
     usdt_probe_release(probedef);
   }
 
-  Persistent<FunctionTemplate> DTraceProbe::constructor_template;
+  Nan::Persistent<FunctionTemplate> DTraceProbe::constructor_template;
 
-  void DTraceProbe::Initialize(Handle<Object> target) {
-    NanScope();
+  void DTraceProbe::Initialize(v8::Local<Object> target) {
+    Nan::HandleScope scope;
 
-    Local<FunctionTemplate> t = NanNew<FunctionTemplate>(DTraceProbe::New);
+    Local<FunctionTemplate> t = Nan::New<FunctionTemplate>(DTraceProbe::New);
     t->InstanceTemplate()->SetInternalFieldCount(1);
-    t->SetClassName(NanNew<String>("DTraceProbe"));
-    NanAssignPersistent(constructor_template, t);
+    t->SetClassName(Nan::New<String>("DTraceProbe").ToLocalChecked());
+    constructor_template.Reset(t);
 
-    NODE_SET_PROTOTYPE_METHOD(t, "fire", DTraceProbe::Fire);
+    Nan::SetPrototypeMethod(t, "fire", DTraceProbe::Fire);
 
-    target->Set(NanNew<String>("DTraceProbe"), t->GetFunction());
+    target->Set(Nan::New<String>("DTraceProbe").ToLocalChecked(), t->GetFunction());
   }
 
   NAN_METHOD(DTraceProbe::New) {
-    NanScope();
+    Nan::HandleScope scope;
     DTraceProbe *probe = new DTraceProbe();
-    probe->Wrap(args.This());
-    NanReturnValue(args.This());
+    probe->Wrap(info.This());
+    info.GetReturnValue().Set(info.This());
   }
 
   NAN_METHOD(DTraceProbe::Fire) {
-    NanScope();
-    DTraceProbe *pd = ObjectWrap::Unwrap<DTraceProbe>(args.Holder());
-    NanReturnValue(pd->_fire(args[0]));
+    Nan::HandleScope scope;
+    DTraceProbe *pd = Nan::ObjectWrap::Unwrap<DTraceProbe>(info.Holder());
+    info.GetReturnValue().Set(pd->_fire(info[0]));
   }
 
-  Handle<Value> DTraceProbe::_fire(v8::Local<v8::Value> argsfn) {
-    NanScope();
+  v8::Local<Value> DTraceProbe::_fire(v8::Local<v8::Value> argsfn) {
+    Nan::HandleScope scope;
 
     if (usdt_is_enabled(this->probedef->probe) == 0) {
-      return NanUndefined();
+      return Nan::Undefined();
     }
 
     // invoke fire callback
-    TryCatch try_catch;
+    Nan::TryCatch try_catch;
 
     if (!argsfn->IsFunction()) {
-      NanThrowError("Must give probe value callback as argument");
-      return NanUndefined();
+      Nan::ThrowError("Must give probe value callback as argument");
+      return Nan::Undefined();
     }
 
     Local<Function> cb = Local<Function>::Cast(argsfn);
-    Local<Value> probe_args = cb->Call(NanObjectWrapHandle(this), 0, NULL);
+    Local<Value> probe_args = cb->Call(this->handle(), 0, NULL);
 
     // exception in args callback?
     if (try_catch.HasCaught()) {
-      FatalException(try_catch);
-      return NanUndefined();
+      Nan::FatalException(try_catch);
+      return Nan::Undefined();
     }
 
     // check return
     if (!probe_args->IsArray()) {
-      return NanUndefined();
+      return Nan::Undefined();
     }
 
     Local<Array> a = Local<Array>::Cast(probe_args);
@@ -89,7 +89,7 @@ namespace node {
       this->arguments[i]->FreeArgument(argv[i]);
     }
 
-    return NanTrue();
+    return Nan::True();
   }
 
 } // namespace node

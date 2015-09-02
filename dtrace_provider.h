@@ -26,7 +26,7 @@ namespace node {
   class DTraceArgument {
   public:
     virtual const char *Type() = 0;
-    virtual void *ArgumentValue(Handle<Value>) = 0;
+    virtual void *ArgumentValue(v8::Local<Value>) = 0;
     virtual void FreeArgument(void *) = 0;
     virtual ~DTraceArgument() { };
   };
@@ -34,33 +34,33 @@ namespace node {
   class DTraceIntegerArgument : public DTraceArgument {
   public:
     const char *Type();
-    void *ArgumentValue(Handle<Value>);
+    void *ArgumentValue(v8::Local<Value>);
     void FreeArgument(void *);
   };
 
   class DTraceStringArgument : public DTraceArgument {
   public:
     const char *Type();
-    void *ArgumentValue(Handle<Value>);
+    void *ArgumentValue(v8::Local<Value>);
     void FreeArgument(void *);
   };
 
   class DTraceJsonArgument : public DTraceArgument {
   public:
     const char *Type();
-    void *ArgumentValue(Handle<Value>);
+    void *ArgumentValue(v8::Local<Value>);
     void FreeArgument(void *);
     DTraceJsonArgument();
     ~DTraceJsonArgument();
   private:
-    Persistent<Object> JSON;
-    Persistent<Function> JSON_stringify;
+    Nan::Persistent<Object> JSON;
+    Nan::Persistent<Function> JSON_stringify;
   };
 
-  class DTraceProbe : public ObjectWrap {
+  class DTraceProbe : public Nan::ObjectWrap {
 
   public:
-    static void Initialize(v8::Handle<v8::Object> target);
+    static void Initialize(v8::Local<v8::Object> target);
     usdt_probedef_t *probedef;
     size_t argc;
     DTraceArgument *arguments[USDT_ARG_MAX];
@@ -68,19 +68,19 @@ namespace node {
     static NAN_METHOD(New);
     static NAN_METHOD(Fire);
 
-    Handle<Value> _fire(v8::Local<v8::Value>);
+    v8::Local<Value> _fire(v8::Local<v8::Value>);
 
-    static Persistent<FunctionTemplate> constructor_template;
+    static Nan::Persistent<FunctionTemplate> constructor_template;
 
     DTraceProbe();
     ~DTraceProbe();
   private:
   };
 
-  class DTraceProvider : public ObjectWrap {
+  class DTraceProvider : public Nan::ObjectWrap {
 
   public:
-    static void Initialize(v8::Handle<v8::Object> target);
+    static void Initialize(v8::Local<v8::Object> target);
     usdt_provider_t *provider;
 
     static NAN_METHOD(New);
@@ -93,8 +93,8 @@ namespace node {
     DTraceProvider();
     ~DTraceProvider();
   private:
-    static Persistent<FunctionTemplate> constructor_template;
+    static Nan::Persistent<FunctionTemplate> constructor_template;
   };
 
-  void InitDTraceProvider(v8::Handle<v8::Object> target);
+  void InitDTraceProvider(v8::Local<v8::Object> target);
 }
