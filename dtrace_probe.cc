@@ -18,7 +18,7 @@ namespace node {
 
   Persistent<FunctionTemplate> DTraceProbe::constructor_template;
 
-  void DTraceProbe::Initialize(Handle<Object> target) {
+  void DTraceProbe::Initialize(v8::Local<Object> target) {
     Nan::HandleScope scope;
 
     Local<FunctionTemplate> t = Nan::New<FunctionTemplate>(DTraceProbe::New);
@@ -44,7 +44,7 @@ namespace node {
     info.GetReturnValue().Set(pd->_fire(info[0]));
   }
 
-  Handle<Value> DTraceProbe::_fire(v8::Local<v8::Value> argsfn) {
+  v8::Local<Value> DTraceProbe::_fire(v8::Local<v8::Value> argsfn) {
     Nan::HandleScope scope;
 
     if (usdt_is_enabled(this->probedef->probe) == 0) {

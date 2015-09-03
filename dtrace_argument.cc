@@ -13,7 +13,7 @@ namespace node {
 # define INTMETHOD ToInt32()
 #endif
 
-  void * DTraceIntegerArgument::ArgumentValue(Handle<Value> value) {
+  void * DTraceIntegerArgument::ArgumentValue(v8::Local<Value> value) {
     if (value->IsUndefined())
       return 0;
     else
@@ -29,7 +29,7 @@ namespace node {
 
   // String Argument
 
-  void * DTraceStringArgument::ArgumentValue(Handle<Value> value) {
+  void * DTraceStringArgument::ArgumentValue(v8::Local<Value> value) {
     if (value->IsUndefined())
       return (void *) strdup("undefined");
 
@@ -49,11 +49,11 @@ namespace node {
 
   DTraceJsonArgument::DTraceJsonArgument() {
     Nan::HandleScope scope;
-    Handle<Context> context = Nan::GetCurrentContext();
-    Handle<Object> global = context->Global();
-    Handle<Object> l_JSON = global->Get(Nan::New<String>("JSON").ToLocalChecked())->ToObject();
-    Handle<Function> l_JSON_stringify
-      = Handle<Function>::Cast(l_JSON->Get(Nan::New<String>("stringify").ToLocalChecked()));
+    v8::Local<Context> context = Nan::GetCurrentContext();
+    v8::Local<Object> global = context->Global();
+    v8::Local<Object> l_JSON = global->Get(Nan::New<String>("JSON").ToLocalChecked())->ToObject();
+    v8::Local<Function> l_JSON_stringify
+      = v8::Local<Function>::Cast(l_JSON->Get(Nan::New<String>("stringify").ToLocalChecked()));
     JSON.Reset(v8::Isolate::GetCurrent(), l_JSON);
     JSON_stringify.Reset(v8::Isolate::GetCurrent(), l_JSON_stringify);
   }
@@ -63,15 +63,15 @@ namespace node {
     JSON_stringify.Reset();
   }
 
-  void * DTraceJsonArgument::ArgumentValue(Handle<Value> value) {
+  void * DTraceJsonArgument::ArgumentValue(v8::Local<Value> value) {
     Nan::HandleScope scope;
 
     if (value->IsUndefined())
       return (void *) strdup("undefined");
 
-    Handle<Value> info[1];
+    v8::Local<Value> info[1];
     info[0] = value;
-    Handle<Value> j = Nan::New<Function>(JSON_stringify)->Call(
+    v8::Local<Value> j = Nan::New<Function>(JSON_stringify)->Call(
           Nan::New<Object>(JSON), 1, info);
 
     if (*j == NULL)

@@ -18,7 +18,7 @@ namespace node {
 
   Persistent<FunctionTemplate> DTraceProvider::constructor_template;
   
-  void DTraceProvider::Initialize(Handle<Object> target) {
+  void DTraceProvider::Initialize(v8::Local<Object> target) {
     Nan::HandleScope scope;
 
     Local<FunctionTemplate> t = Nan::New<FunctionTemplate>(DTraceProvider::New);
@@ -80,13 +80,13 @@ namespace node {
     Nan::HandleScope scope;
     const char *types[USDT_ARG_MAX];
 
-    Handle<Object> obj = info.Holder();
+    v8::Local<Object> obj = info.Holder();
     DTraceProvider *provider = Nan::ObjectWrap::Unwrap<DTraceProvider>(obj);
 
     // create a DTraceProbe object
-    Handle<Function> klass =
+    v8::Local<Function> klass =
         Nan::New<FunctionTemplate>(DTraceProbe::constructor_template)->GetFunction();
-    Handle<Object> pd = klass->NewInstance();
+    v8::Local<Object> pd = klass->NewInstance();
 
     // store in provider object
     DTraceProbe *probe = Nan::ObjectWrap::Unwrap<DTraceProbe>(pd->ToObject());
@@ -125,13 +125,13 @@ namespace node {
   NAN_METHOD(DTraceProvider::RemoveProbe) {
     Nan::HandleScope scope;
 
-    Handle<Object> provider_obj = info.Holder();
+    v8::Local<Object> provider_obj = info.Holder();
     DTraceProvider *provider = Nan::ObjectWrap::Unwrap<DTraceProvider>(provider_obj);
 
-    Handle<Object> probe_obj = Local<Object>::Cast(info[0]);
+    v8::Local<Object> probe_obj = Local<Object>::Cast(info[0]);
     DTraceProbe *probe = Nan::ObjectWrap::Unwrap<DTraceProbe>(probe_obj);
 
-    Handle<String> name = Nan::New<String>(probe->probedef->name).ToLocalChecked();
+    v8::Local<String> name = Nan::New<String>(probe->probedef->name).ToLocalChecked();
     provider_obj->Delete(name);
 
     if (usdt_provider_remove_probe(provider->provider, probe->probedef) != 0) {
@@ -179,8 +179,8 @@ namespace node {
       return;
     }
 
-    Handle<Object> provider = info.Holder();
-    Handle<Object> probe = Local<Object>::Cast(provider->Get(info[0]));
+    v8::Local<Object> provider = info.Holder();
+    v8::Local<Object> probe = Local<Object>::Cast(provider->Get(info[0]));
 
     DTraceProbe *p = Nan::ObjectWrap::Unwrap<DTraceProbe>(probe);
     if (p == NULL)
@@ -192,7 +192,7 @@ namespace node {
   }
 
   extern "C" void
-  init(Handle<Object> target) {
+  init(v8::Local<Object> target) {
     DTraceProvider::Initialize(target);
   }
 
