@@ -16,7 +16,7 @@ namespace node {
     usdt_probe_release(probedef);
   }
 
-  Persistent<FunctionTemplate> DTraceProbe::constructor_template;
+  Nan::Persistent<FunctionTemplate> DTraceProbe::constructor_template;
 
   void DTraceProbe::Initialize(v8::Local<Object> target) {
     Nan::HandleScope scope;
@@ -24,7 +24,7 @@ namespace node {
     Local<FunctionTemplate> t = Nan::New<FunctionTemplate>(DTraceProbe::New);
     t->InstanceTemplate()->SetInternalFieldCount(1);
     t->SetClassName(Nan::New<String>("DTraceProbe").ToLocalChecked());
-    constructor_template.Reset(v8::Isolate::GetCurrent(), t);
+    constructor_template.Reset(t);
 
     Nan::SetPrototypeMethod(t, "fire", DTraceProbe::Fire);
 

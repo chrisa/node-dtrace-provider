@@ -53,8 +53,8 @@ namespace node {
     DTraceJsonArgument();
     ~DTraceJsonArgument();
   private:
-    Persistent<Object> JSON;
-    Persistent<Function> JSON_stringify;
+    Nan::Persistent<Object> JSON;
+    Nan::Persistent<Function> JSON_stringify;
   };
 
   class DTraceProbe : public Nan::ObjectWrap {
@@ -70,7 +70,7 @@ namespace node {
 
     v8::Local<Value> _fire(v8::Local<v8::Value>);
 
-    static Persistent<FunctionTemplate> constructor_template;
+    static Nan::Persistent<FunctionTemplate> constructor_template;
 
     DTraceProbe();
     ~DTraceProbe();
@@ -93,7 +93,7 @@ namespace node {
     DTraceProvider();
     ~DTraceProvider();
   private:
-    static Persistent<FunctionTemplate> constructor_template;
+    static Nan::Persistent<FunctionTemplate> constructor_template;
   };
 
   void InitDTraceProvider(v8::Local<v8::Object> target);

@@ -54,8 +54,8 @@ namespace node {
     v8::Local<Object> l_JSON = global->Get(Nan::New<String>("JSON").ToLocalChecked())->ToObject();
     v8::Local<Function> l_JSON_stringify
       = v8::Local<Function>::Cast(l_JSON->Get(Nan::New<String>("stringify").ToLocalChecked()));
-    JSON.Reset(v8::Isolate::GetCurrent(), l_JSON);
-    JSON_stringify.Reset(v8::Isolate::GetCurrent(), l_JSON_stringify);
+    JSON.Reset(l_JSON);
+    JSON_stringify.Reset(l_JSON_stringify);
   }
 
   DTraceJsonArgument::~DTraceJsonArgument() {

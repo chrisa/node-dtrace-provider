@@ -10,21 +10,21 @@ namespace node {
   DTraceProvider::DTraceProvider() : Nan::ObjectWrap() {
     provider = NULL;
   }
-  
+
   DTraceProvider::~DTraceProvider() {
     usdt_provider_disable(provider);
     usdt_provider_free(provider);
   }
 
-  Persistent<FunctionTemplate> DTraceProvider::constructor_template;
-  
+  Nan::Persistent<FunctionTemplate> DTraceProvider::constructor_template;
+
   void DTraceProvider::Initialize(v8::Local<Object> target) {
     Nan::HandleScope scope;
 
     Local<FunctionTemplate> t = Nan::New<FunctionTemplate>(DTraceProvider::New);
     t->InstanceTemplate()->SetInternalFieldCount(1);
     t->SetClassName(Nan::New<String>("DTraceProvider").ToLocalChecked());
-    constructor_template.Reset(v8::Isolate::GetCurrent(), t);
+    constructor_template.Reset(t);
 
     Nan::SetPrototypeMethod(t, "addProbe", DTraceProvider::AddProbe);
     Nan::SetPrototypeMethod(t, "removeProbe", DTraceProvider::RemoveProbe);
