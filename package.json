@@ -18,7 +18,7 @@
     "node": ">=0.10"
   },
   "dependencies": {
-    "nan": "^2.0.8"
+    "nan": "^2.3.3"
   },
   "devDependencies": {
     "tap": "^0.2.0"
