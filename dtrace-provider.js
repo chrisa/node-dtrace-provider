@@ -20,16 +20,21 @@ for (var i in builds) {
     } catch (e) {
         // if the platform looks like it _should_ have DTrace
         // available, log a failure to load the bindings.
-        if (process.platform == 'darwin' ||
-            process.platform == 'solaris' ||
-            process.platform == 'freebsd') {
-            console.error(e);
+        if (e && e.code === 'MODULE_NOT_FOUND' &&
+            (process.platform === 'darwin' ||
+             process.platform === 'solaris' ||
+             process.platform === 'freebsd')) {
+
+            console.warn('Warning. dtrace provider binding not found in  %s/build/%s folder on %s', __dirname, builds[i], process.platform);
+        } else {
+            console.error('Error. dtrace provider: ' + e);
         }
     }
 }
 
 if (!DTraceProvider) {
     DTraceProvider = DTraceProviderStub;
+    console.warn('Warning. dtrace uses fallback provider.');
 }
 
 exports.DTraceProvider = DTraceProvider;
