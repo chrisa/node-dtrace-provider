@@ -68,7 +68,7 @@ namespace node {
     static NAN_METHOD(New);
     static NAN_METHOD(Fire);
 
-    v8::Local<Value> _fire(v8::Local<v8::Value>);
+    v8::Local<Value> _fire(Nan::NAN_METHOD_ARGS_TYPE, size_t);
 
     static Nan::Persistent<FunctionTemplate> constructor_template;
 

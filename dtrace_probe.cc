@@ -40,11 +40,17 @@ namespace node {
 
   NAN_METHOD(DTraceProbe::Fire) {
     Nan::HandleScope scope;
+
+    if (!info[0]->IsFunction()) {
+      Nan::ThrowTypeError("Must give probe value callback as first argument");
+      return;
+    }
+
     DTraceProbe *pd = Nan::ObjectWrap::Unwrap<DTraceProbe>(info.Holder());
-    info.GetReturnValue().Set(pd->_fire(info[0]));
+    info.GetReturnValue().Set(pd->_fire(info, 0));
   }
 
-  v8::Local<Value> DTraceProbe::_fire(v8::Local<v8::Value> argsfn) {
+  v8::Local<Value> DTraceProbe::_fire(Nan::NAN_METHOD_ARGS_TYPE argsinfo, size_t fnidx) {
     Nan::HandleScope scope;
 
     if (usdt_is_enabled(this->probedef->probe) == 0) {
@@ -54,13 +60,17 @@ namespace node {
     // invoke fire callback
     Nan::TryCatch try_catch;
 
-    if (!argsfn->IsFunction()) {
-      Nan::ThrowError("Must give probe value callback as argument");
-      return Nan::Undefined();
+    size_t cblen = argsinfo.Length() - fnidx - 1;
+    Local<Value> *cbargs = new Local<Value>[cblen];
+
+    for (size_t i = 0; i < cblen; i++) {
+        cbargs[i] = argsinfo[i + fnidx + 1];
     }
 
-    Local<Function> cb = Local<Function>::Cast(argsfn);
-    Local<Value> probe_args = cb->Call(this->handle(), 0, NULL);
+    Local<Function> cb = Local<Function>::Cast(argsinfo[fnidx]);
+    Local<Value> probe_args = cb->Call(this->handle(), cblen, cbargs);
+
+    delete [] cbargs;
 
     // exception in args callback?
     if (try_catch.HasCaught()) {

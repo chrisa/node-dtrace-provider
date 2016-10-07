@@ -186,7 +186,7 @@ namespace node {
     if (p == NULL)
       return;
 
-    p->_fire(info[1]);
+    p->_fire(info, 1);
 
     info.GetReturnValue().Set(Nan::True());
   }

@@ -12,8 +12,8 @@ to look at information from other runtime or system-level providers.
 The provider is not created in the usual way, by declaring it and then
 changing the build process to include it, but instead dynamically at
 runtime. This is done entirely in-process, and there is no background
-compiler or dtrace(1) invocation. The process creating the provider
-need not run as root.
+compiler or [dtrace(1M)](https://illumos.org/man/1M/dtrace) invocation.
+The process creating the provider need not run as root.
 
 ## INSTALL
 
@@ -23,30 +23,82 @@ need not run as root.
 
 Here's a simple example of creating a provider:
 
-    var d = require('dtrace-provider');
+```javascript
+var d = require('dtrace-provider');
 
-    var dtp = d.createDTraceProvider("nodeapp");
-    var p1 = dtp.addProbe("probe1", "int", "int");
-    var p2 = dtp.addProbe("probe2", "char *");
-    dtp.enable();	   
+var dtp = d.createDTraceProvider("nodeapp");
+var p1 = dtp.addProbe("probe1", "int", "int");
+var p2 = dtp.addProbe("probe2", "char *");
+dtp.enable();
+```
 
 Probes may be fired via the provider object:
 
-    dtp.fire("probe1", function(p) {
-        return [1, 2];
-    });
-    dtp.fire("probe2", function(p) { 
-        return ["hello, dtrace via provider", "foo"];
-    });
+```javascript
+dtp.fire("probe1", function() {
+    return [1, 2];
+});
+dtp.fire("probe2", function() {
+    return ["hello, dtrace via provider", "foo"];
+});
+```
 
 or via the probe objects themselves:
 
-    p1.fire(function(p) {
-      return [1, 2, 3, 4, 5, 6];
+```javascript
+p1.fire(function() {
+  return [1, 2, 3, 4, 5, 6];
+});
+p2.fire(function() {
+  return ["hello, dtrace via probe", "foo"];
+});
+```
+
+Note that `.fire()` takes a callback that returns the arguments to be
+provided when the DTrace probe actually fires. This allows you to call
+`.fire()` unconditionally when you want to fire the probe, but the
+callback will be invoked only when the DTrace probe is actually
+enabled. This allows you to create probes whose arguments might be
+expensive to construct, and only do any work when the probe is
+actually enabled. (Examples might include converting a large object to
+a string representation or gathering large amounts of information.)
+
+In some cases, creating a new closure to pass to `.fire()` each time
+it's called may introduce unwanted overhead. For extremely
+CPU-intensive or memory-conscious workloads, you can avoid this by
+lifting the closures for your hot probes into an outer scope. You can
+then supply arguments to that function as additional arguments to
+`.fire()`. As an example, you can convert the following program:
+
+```javascript
+function manipulateObj(largeObj) {
+    var count = 0;
+    var name = null;
+    ...
+    p1.fire(function () {
+        return [count, keyToValue(name), JSON.stringify(largeObj)];
     });
-    p2.fire(function(p) {
-      return ["hello, dtrace via probe", "foo"];
-    });
+}
+```
+
+Into this one:
+
+```javascript
+function f(a, b, c) {
+    return [a, keyToValue(b), JSON.stringify(c)];
+}
+
+function manipulateObj(largeObj) {
+    var count = 0;
+    var name = null;
+    ...
+    p1.fire(f, count, name, largeObj);
+}
+```
+
+Be careful to avoid passing `.fire()` additional arguments that are
+themselves expensive to construct, as that undermines the design goal
+here: minimizing the effect of disabled probes.
 
 This example creates a provider called "nodeapp", and adds two
 probes. It then enables the provider, at which point the provider
@@ -94,7 +146,7 @@ is available whether or not the platform supports it.
 ## PLATFORM SUPPORT
 
 This libusdt-based Node.JS module supports 64 and 32 bit processes on
-Mac OS X and Solaris-like systems such as Illumos or SmartOS. As more
+Mac OS X and Solaris-like systems such as illumos or SmartOS. As more
 platform support is added to libusdt, those platforms will be
 supported by this module. See libusdt's status at:
 
@@ -123,15 +175,17 @@ unless probes are placed in particularly hot code paths.
 
 The source is available at:
 
-  https://github.com/chrisa/node-dtrace-provider.
+  https://github.com/chrisa/node-dtrace-provider
 
-For issues, please use the Github issue tracker linked to the
-repository. Github pull requests are very welcome. 
+For issues, please use the GitHub issue tracker linked to the
+repository. GitHub pull requests are very welcome.
 
 ## RUNNING THE TESTS
 
-   $ npm install
-   $ sudo ./node_modules/.bin/tap --tap test/*.test.js
+```shell
+$ npm install
+$ sudo ./node_modules/.bin/tap --tap test/*.test.js
+```
 
 ## OTHER IMPLEMENTATIONS
 

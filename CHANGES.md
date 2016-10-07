@@ -3,6 +3,9 @@ dtrace-provider - Changes
 
 ## HISTORY
 
+ * 0.8.0:
+   Support passing additional arguments to probe function via `.fire()`
+
  * 0.7.1:
    Update libusdt for chrisa/libusdt#12 fix
 
