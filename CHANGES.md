@@ -3,6 +3,9 @@ dtrace-provider - Changes
 
 ## HISTORY
 
+ * 0.7.0: known support for v0.10.47, v0.12.16, v4.6.0.
+   Updated NaN dependency to remove warnings on newer Node versions.
+
  * 0.2.8:
    Add NODE_MODULE() declaration for compatibility with Node 0.9.1+
    (reported by Trent Mick)
