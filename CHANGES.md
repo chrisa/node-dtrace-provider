@@ -3,6 +3,9 @@ dtrace-provider - Changes
 
 ## HISTORY
 
+ * 0.7.1:
+   Update libusdt for chrisa/libusdt#12 fix
+
  * 0.7.0: known support for v0.10.47, v0.12.16, v4.6.0.
    Updated NaN dependency to remove warnings on newer Node versions.
 
