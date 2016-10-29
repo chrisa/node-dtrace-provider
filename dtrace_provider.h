@@ -16,7 +16,9 @@ extern "C" {
 
 #ifndef __APPLE__
 #include <stdlib.h>
+#ifndef __FreeBSD__
 #include <malloc.h>
+#endif
 #endif
 
 namespace node {
