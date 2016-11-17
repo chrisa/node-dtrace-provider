@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/feifeiiiiiiiiiii/node-dtrace-provider.svg?branch=master)](https://travis-ci.org/feifeiiiiiiiiiii/node-dtrace-provider)
+
 # dtrace-provider - Native DTrace providers for Node.js apps.
 
 This extension allows you to create native DTrace providers for your
@@ -7,7 +9,7 @@ information about the node runtime.
 
 You could use this to expose high-level information about the inner
 workings of your application, or to create a specific context in which
-to look at information from other runtime or system-level providers. 
+to look at information from other runtime or system-level providers.
 
 The provider is not created in the usual way, by declaring it and then
 changing the build process to include it, but instead dynamically at
@@ -112,12 +114,12 @@ The probes are then fired, which produces this output:
     dtrace: description 'nodeapp*:::probe2' matched 0 probes
     CPU     ID                    FUNCTION:NAME
       1 123562                      func:probe1                 1                2
-      1 123563                      func:probe2   hello, dtrace                    
+      1 123563                      func:probe2   hello, dtrace
 
 Arguments are captured by a callback only executed when the probe is
 enabled. This means you can do more expensive work to gather arguments.
 
-The maximum number of arguments supported is 32. 
+The maximum number of arguments supported is 32.
 
 Available argument types are "int", for integer numeric values,
 "char *" for strings, and "json" for objects rendered into JSON strings.
