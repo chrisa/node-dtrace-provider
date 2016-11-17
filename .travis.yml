@@ -1,0 +1,17 @@
+language: node_js
+
+os:
+  - osx
+
+node_js:
+  - '0.10'
+  - '0.12'
+  - '4'
+  - '5'
+  - 'node'
+  - 'iojs'
+
+sudo: required
+
+script:
+  - npm test
