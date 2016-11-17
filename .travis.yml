@@ -1,9 +1,17 @@
-os:
-  - freebsd
-  - osx
-sudo: true
 language: node_js
+
+os:
+  - osx
+
 node_js:
-    - "4"
-    - "5"
-script: npm test
+  - '0.10'
+  - '0.12'
+  - '4'
+  - '5'
+  - 'node'
+  - 'iojs'
+
+sudo: false
+
+script:
+  - npm test
