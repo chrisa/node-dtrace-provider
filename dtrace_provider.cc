@@ -92,6 +92,10 @@ namespace node {
     DTraceProbe *probe = Nan::ObjectWrap::Unwrap<DTraceProbe>(pd->ToObject());
     obj->Set(info[0]->ToString(), pd);
 
+    // reference the provider to avoid GC'ing it when only probes remain in scope.
+    Nan::ForceSet(pd, Nan::New<String>("__prov__").ToLocalChecked(), obj,
+        static_cast<PropertyAttribute>(DontEnum | ReadOnly | DontDelete));
+
     // add probe to provider
     for (int i = 0; i < USDT_ARG_MAX; i++) {
       if (i < info.Length() - 1) {
