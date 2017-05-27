@@ -3,6 +3,12 @@ dtrace-provider - Changes
 
 ## HISTORY
 
+ * 0.8.2:
+   Error installing in 64-bit SmartOS zones with 32-bit node
+
+ * 0.8.1:
+   Support FreeBSD 10 & 11
+
  * 0.8.0:
    Support passing additional arguments to probe function via `.fire()`
 
