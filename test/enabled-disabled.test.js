@@ -7,8 +7,8 @@ test(
     dtest(
         function() { },
         [
-            'dtrace', '-Zqn', 
-            'nodeapp*:::{ printf("%d\\n", arg0); }',
+            'dtrace', '-Zqn',
+            'nodeapp$target:::{ printf("%d\\n", arg0); }',
             '-c', format('node %s/enabled-disabled_fire.js', __dirname)
         ],
         function(t, exit_code, traces) {

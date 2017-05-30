@@ -7,8 +7,8 @@ test(
     dtest(
         function() { },
         [
-            'dtrace', '-Zqn', 
-            'test*:::{printf("%s\\n%s\\n", probename, probemod)}',
+            'dtrace', '-Zqn',
+            'test$target:::{printf("%s\\n%s\\n", probename, probemod)}',
             '-c', format('node %s/disambiguation_fire.js', __dirname)
         ],
         function(t, exit_code, traces) {
