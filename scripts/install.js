@@ -3,7 +3,7 @@
 var movedFile = false;
 
 if (["linux", "win32"].indexOf(process.platform) !== -1)
-  return;
+  process.exit(1);
 
 var fs = require('fs');
 var path = require('path');
