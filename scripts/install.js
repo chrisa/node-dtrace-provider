@@ -16,7 +16,8 @@ fs.renameSync(src, dst);
 movedFile = true;
 
 //npm_execpath: '/usr/local/lib/node_modules/npm/bin/npm-cli.js',
-var nodegyp = path.join(process.env.npm_execpath,
+var execPath = process.env.npm_execpath || '';
+var nodegyp = path.join(execPath,
                         '..',
                         'node-gyp-bin',
                         'node-gyp');
