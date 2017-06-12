@@ -3,6 +3,9 @@ dtrace-provider - Changes
 
 ## HISTORY
 
+ * 0.8.3:
+   Install fails with yarn
+
  * 0.8.2:
    Error installing in 64-bit SmartOS zones with 32-bit node
 

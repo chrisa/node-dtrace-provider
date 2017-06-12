@@ -15,41 +15,30 @@ fs.renameSync(src, dst);
 
 movedFile = true;
 
-//npm_execpath: '/usr/local/lib/node_modules/npm/bin/npm-cli.js',
-var nodegyp = path.join(process.env.npm_execpath,
-                        '..',
-                        'node-gyp-bin',
-                        'node-gyp');
-
-if (!fs.existsSync(nodegyp))
-  nodegyp = path.join(process.execPath,
-                        '..',
-                        '..',
-                        'lib',
-                        'node_modules',
-                        'npm',
-                        'bin',
-                        'node-gyp-bin',
-                        'node-gyp');
-
-if (!fs.existsSync(nodegyp)) {
-  console.error('cannot locate npm install');
-  return;
-}
-
 var spawn = require('child_process').spawn;
 
 var stdio = 'ignore';
 
-if (process.env.V)
+if (process.env.V) {
   stdio = 'inherit';
+}
 
 var options = {
   cwd: path.join(__dirname, '..'),
   stdio: stdio
 };
 
-var child = spawn(nodegyp, ['rebuild'], options);
+var child = spawn('node-gyp', [ 'rebuild' ], options);
+
+child.on('error', function (err) {
+  if (err.code === 'ENOENT') {
+    console.error('cannot locate node-gyp');
+  } else {
+    console.error(err);
+  }
+
+  process.exit(0);
+});
 
 child.on('close', function(code, signal) {
   if ((code || signal) && process.env.V === undefined) {
