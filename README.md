@@ -152,8 +152,19 @@ supported by this module. See libusdt's status at:
 
   https://github.com/chrisa/libusdt#readme
 
-FreeBSD is supported in principle but is restricted to only 4 working
-arguments per probe.
+When using Mac OS X, be aware that as of 10.11 (El Capitan), DTrace use
+is restricted, and you'll probably want to
+[disable SIP](http://internals.exposed/blog/dtrace-vs-sip.html) to
+effectively use DTrace.
+
+FreeBSD 10 and 11 are also supported, but you'll need to make sure that
+you have the DTrace headers installed in `/usr/src` otherwise libusdt
+won't be able to compile. You can
+[clone them using SVN](https://www.freebsd.org/doc/handbook/svn.html),
+or find the correct `src.txz`
+[here](http://ftp.freebsd.org/pub/FreeBSD/releases/) and extract that.
+Also note that FreeBSD 10 is restricted to only 4 working arguments per
+probe.
 
 Platforms not supporting DTrace (notably, Linux and Windows) may
 install this module without building libusdt, with a stub no-op
@@ -161,7 +172,7 @@ implementation provided for compatibility. This allows cross-platform
 npm modules to embed probes and include a dependency on this module.
 
 GNU Make is required to build libusdt; the build scripts will look for
-gmake in PATH first, and then for make.
+gmake in `PATH` first, and then for make.
 
 ## CAVEATS
 
