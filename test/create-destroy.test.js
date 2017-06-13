@@ -8,7 +8,7 @@ test(
         function() { },
         [
             'dtrace', '-Zqn',
-            'nodeapp*:::{ printf("%d\\n", arg0); }',
+            'nodeapp$target:::{ printf("%d\\n", arg0); }',
             '-c', format('node %s/create-destroy_fire.js', __dirname)
         ],
         function(t, exit_code, traces) {

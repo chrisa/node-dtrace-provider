@@ -27,7 +27,7 @@
   },
   "scripts": {
     "install": "node scripts/install.js",
-    "test": "tap test/*test.js"
+    "test": "sudo tap test/*test.js"
   },
   "main": "./dtrace-provider.js"
 }
