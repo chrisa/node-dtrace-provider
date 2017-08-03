@@ -3,6 +3,10 @@ dtrace-provider - Changes
 
 ## HISTORY
 
+ * 0.8.4:
+   Only log error once when DTraceProviderBindings can't be found
+   Install fails on Debian due to differently named node binary
+
  * 0.8.3:
    Install fails with yarn
 

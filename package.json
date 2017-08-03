@@ -1,6 +1,6 @@
 {
   "name": "dtrace-provider",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "description": "Native DTrace providers for node.js applications",
   "keywords": [
     "dtrace",
@@ -26,7 +26,7 @@
     "tap": "^0.2.0"
   },
   "scripts": {
-    "install": "node scripts/install.js",
+    "install": "$npm_node_execpath scripts/install.js",
     "test": "tap test/*test.js"
   },
   "main": "./dtrace-provider.js"

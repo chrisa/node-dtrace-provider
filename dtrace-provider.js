@@ -11,6 +11,7 @@ DTraceProviderStub.prototype.fire = function() {};
 DTraceProviderStub.prototype.disable = function() {};
 
 var builds = ['Release', 'default', 'Debug'];
+var err = null;
 
 for (var i in builds) {
     try {
@@ -18,17 +19,23 @@ for (var i in builds) {
         DTraceProvider = binding.DTraceProvider;
         break;
     } catch (e) {
-        // if the platform looks like it _should_ have DTrace
-        // available, log a failure to load the bindings.
-        if (process.platform == 'darwin' ||
-            process.platform == 'sunos' ||
-            process.platform == 'freebsd') {
-            console.error(e);
+        if (err === null) {
+            err = e;
         }
     }
 }
 
 if (!DTraceProvider) {
+    /*
+     * If the platform looks like it _should_ have DTrace
+     * available, log a failure to load the bindings.
+     */
+    if (process.platform === 'darwin' ||
+        process.platform === 'sunos' ||
+        process.platform === 'freebsd') {
+        console.error(err);
+    }
+
     DTraceProvider = DTraceProviderStub;
 }
 
