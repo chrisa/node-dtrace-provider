@@ -3,6 +3,10 @@ dtrace-provider - Changes
 
 ## HISTORY
 
+ * 0.8.5:
+   Reverted "Install fails on Debian due to differently named node binary" for
+   now
+
  * 0.8.4:
    Only log error once when DTraceProviderBindings can't be found
    Install fails on Debian due to differently named node binary
