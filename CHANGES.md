@@ -3,6 +3,9 @@ dtrace-provider - Changes
 
 ## HISTORY
 
+ * 0.8.6:
+   Improved compilation failure behaviour (#96)
+
  * 0.8.5:
    Reverted "Install fails on Debian due to differently named node binary" for
    now

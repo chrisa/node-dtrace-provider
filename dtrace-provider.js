@@ -13,9 +13,9 @@ DTraceProviderStub.prototype.disable = function() {};
 var builds = ['Release', 'default', 'Debug'];
 var err = null;
 
-for (var i in builds) {
+for (var i = 0; i < builds.length; i++) {
     try {
-        var binding = require('./build/' + builds[i] + '/DTraceProviderBindings');
+        var binding = require('./src/build/' + builds[i] + '/DTraceProviderBindings');
         DTraceProvider = binding.DTraceProvider;
         break;
     } catch (e) {
@@ -26,17 +26,11 @@ for (var i in builds) {
 }
 
 if (!DTraceProvider) {
-    /*
-     * If the platform looks like it _should_ have DTrace
-     * available, log a failure to load the bindings.
-     */
-    if (process.platform === 'darwin' ||
-        process.platform === 'sunos' ||
-        process.platform === 'freebsd') {
-        console.error(err);
+    if (process.env.NODE_DTRACE_PROVIDER_REQUIRE === 'hard') {
+        throw err;
+    } else {
+        DTraceProvider = DTraceProviderStub;
     }
-
-    DTraceProvider = DTraceProviderStub;
 }
 
 exports.DTraceProvider = DTraceProvider;

@@ -174,6 +174,31 @@ npm modules to embed probes and include a dependency on this module.
 GNU Make is required to build libusdt; the build scripts will look for
 gmake in `PATH` first, and then for make.
 
+### TROUBLESHOOTING BUILD ISSUES
+
+If compilation fails during installation on platforms with DTrace, then
+the library will fall back to the stub implementation that does nothing.
+To force an installation failure when compiling fails, set the environment
+variable `NODE_DTRACE_PROVIDER_REQUIRE` to `hard`:
+
+```shell
+$ NODE_DTRACE_PROVIDER_REQUIRE=hard npm install
+```
+
+This will then show you the output of the build process so you can see at
+which point it's having an issue. Common issues are:
+
+- Missing a C/C++ compiler toolchain for your platform.
+- `python` is Python 3 instead of Python 2; run `npm config set python python2.7`
+  (or similar) to set the Python binary npm uses.
+- On OS X you may need to agree to the XCode license if that's the compiler
+  toolchain you're using. This will usually manifest with an error like
+  `Agreeing to the Xcode/iOS license requires admin privileges, please re-run as root via sudo.`
+  To accept the license, you can run `sudo xcodebuild -license`.
+
+Once you've found and fixed the issue, you can run `npm rebuild` to rerun
+the lifecycle scripts.
+
 ## CAVEATS
 
 There is some overhead to probes, even when disabled. Probes are
@@ -184,12 +209,12 @@ unless probes are placed in particularly hot code paths.
 
 ## CONTRIBUTING
 
-The source is available at:
+To clone the project's source code:
 
-  https://github.com/chrisa/node-dtrace-provider
+    $ git clone --recursive https://github.com/chrisa/node-dtrace-provider.git
 
-For issues, please use the GitHub issue tracker linked to the
-repository. GitHub pull requests are very welcome.
+For issues, please use the [GitHub issue tracker](https://github.com/chrisa/node-dtrace-provider/issues)
+linked to the repository. GitHub pull requests are very welcome.
 
 ## RUNNING THE TESTS
 
