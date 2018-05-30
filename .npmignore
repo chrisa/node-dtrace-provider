@@ -7,3 +7,4 @@ build
 *.log
 test
 TODO.md
+*.tgz

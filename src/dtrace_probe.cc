@@ -22,7 +22,7 @@ namespace node {
     Nan::HandleScope scope;
 
     Local<FunctionTemplate> t = Nan::New<FunctionTemplate>(DTraceProbe::New);
-    t->InstanceTemplate()->SetInternalFieldCount(1);
+    t->InstanceTemplate()->SetInternalFieldCount(2);
     t->SetClassName(Nan::New<String>("DTraceProbe").ToLocalChecked());
     constructor_template.Reset(t);
 

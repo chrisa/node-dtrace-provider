@@ -117,6 +117,7 @@ namespace node {
 
     String::Utf8Value name(info[0]->ToString());
     probe->probedef = usdt_create_probe(*name, *name, probe->argc, types);
+    Nan::SetInternalFieldPointer(pd, 1, provider);
     usdt_provider_add_probe(provider->provider, probe->probedef);
 
     for (size_t i = 0; i < probe->argc; i++) {
@@ -183,12 +184,32 @@ namespace node {
       return;
     }
 
-    v8::Local<Object> provider = info.Holder();
-    v8::Local<Object> probe = Local<Object>::Cast(provider->Get(info[0]));
+    v8::Local<Object> holder = info.Holder();
+    DTraceProvider *provider = Nan::ObjectWrap::Unwrap<DTraceProvider>(holder);
+
+    Nan::MaybeLocal<v8::Value> maybe = Nan::Get(holder, info[0]);
+    if (maybe.IsEmpty()) {
+      return;
+    }
+
+    v8::Local<v8::Value> value = maybe.ToLocalChecked();
+    if (!value->IsObject()) {
+      return;
+    }
+
+    v8::Local<Object> probe = Local<Object>::Cast(value);
+    if (probe->InternalFieldCount() != 2) {
+      return;
+    }
+
+    if (Nan::GetInternalFieldPointer(probe, 1) != provider) {
+      return;
+    }
 
     DTraceProbe *p = Nan::ObjectWrap::Unwrap<DTraceProbe>(probe);
-    if (p == NULL)
+    if (p == NULL) {
       return;
+    }
 
     p->_fire(info, 1);
 

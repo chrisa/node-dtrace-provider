@@ -3,6 +3,10 @@ dtrace-provider - Changes
 
 ## HISTORY
 
+ * 0.8.7:
+   Known support for v0.10.48, v0.12.16, v4.6.0, v7.5.0, v8.9.4, v10.3.0 (#119)
+   Don't crash when attempting to fire unknown probes (#120)
+
  * 0.8.6:
    Improved compilation failure behaviour (#96)
 
