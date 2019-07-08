@@ -32,7 +32,7 @@ namespace node {
     Nan::SetPrototypeMethod(t, "disable", DTraceProvider::Disable);
     Nan::SetPrototypeMethod(t, "fire", DTraceProvider::Fire);
 
-    target->Set(Nan::New<String>("DTraceProvider").ToLocalChecked(), t->GetFunction());
+    target->Set(Nan::New<String>("DTraceProvider").ToLocalChecked(), Nan::GetFunction(t).ToLocalChecked());
 
     DTraceProbe::Initialize(target);
   }
@@ -49,7 +49,7 @@ namespace node {
       return;
     }
 
-    String::Utf8Value name(info[0]->ToString());
+    Nan::Utf8String name(info[0]);
 
     if (info.Length() == 2) {
       if (!info[1]->IsString()) {
@@ -57,7 +57,7 @@ namespace node {
         return;
       }
 
-      String::Utf8Value mod(info[1]->ToString());
+      Nan::Utf8String mod(info[1]);
       (void) snprintf(module, sizeof (module), "%s", *mod);
     } else if (info.Length() == 1) {
       // If no module name is provided, develop a synthetic module name based
@@ -84,22 +84,23 @@ namespace node {
     DTraceProvider *provider = Nan::ObjectWrap::Unwrap<DTraceProvider>(obj);
 
     // create a DTraceProbe object
-    v8::Local<Function> klass =
-        Nan::New<FunctionTemplate>(DTraceProbe::constructor_template)->GetFunction();
+    v8::Local<FunctionTemplate> tmpl =
+        Nan::New<FunctionTemplate>(DTraceProbe::constructor_template);
+    v8::Local<Function> klass = Nan::GetFunction(tmpl).ToLocalChecked();
     v8::Local<Object> pd = Nan::NewInstance(klass).ToLocalChecked();
 
     // store in provider object
-    DTraceProbe *probe = Nan::ObjectWrap::Unwrap<DTraceProbe>(pd->ToObject());
-    obj->Set(info[0]->ToString(), pd);
+    DTraceProbe *probe = Nan::ObjectWrap::Unwrap<DTraceProbe>(Nan::To<v8::Object>(pd).ToLocalChecked());
+    obj->Set(Nan::To<v8::String>(info[0]).ToLocalChecked(), pd);
 
     // reference the provider to avoid GC'ing it when only probes remain in scope.
-    Nan::ForceSet(pd, Nan::New<String>("__prov__").ToLocalChecked(), obj,
+    Nan::DefineOwnProperty(pd, Nan::New<String>("__prov__").ToLocalChecked(), obj,
         static_cast<PropertyAttribute>(DontEnum | ReadOnly | DontDelete));
 
     // add probe to provider
     for (int i = 0; i < USDT_ARG_MAX; i++) {
       if (i < info.Length() - 1) {
-        String::Utf8Value type(info[i + 1]->ToString());
+        Nan::Utf8String type(info[i + 1]);
 
         if (strncmp("json", *type, 4) == 0)
           probe->arguments[i] = new DTraceJsonArgument();
@@ -115,7 +116,7 @@ namespace node {
       }
     }
 
-    String::Utf8Value name(info[0]->ToString());
+    Nan::Utf8String name(info[0]);
     probe->probedef = usdt_create_probe(*name, *name, probe->argc, types);
     Nan::SetInternalFieldPointer(pd, 1, provider);
     usdt_provider_add_probe(provider->provider, probe->probedef);
@@ -136,8 +137,9 @@ namespace node {
     v8::Local<Object> probe_obj = Local<Object>::Cast(info[0]);
     DTraceProbe *probe = Nan::ObjectWrap::Unwrap<DTraceProbe>(probe_obj);
 
-    v8::Local<String> name = Nan::New<String>(probe->probedef->name).ToLocalChecked();
-    provider_obj->Delete(name);
+    v8::Local<String> name =
+        Nan::New<String>(probe->probedef->name).ToLocalChecked();
+    Nan::Delete(provider_obj, name);
 
     if (usdt_provider_remove_probe(provider->provider, probe->probedef) != 0) {
       Nan::ThrowError(usdt_errstr(provider->provider));

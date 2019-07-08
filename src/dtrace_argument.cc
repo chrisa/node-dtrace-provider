@@ -8,16 +8,16 @@ namespace node {
   // Integer Argument
 
 #ifdef __x86_64__
-# define INTMETHOD ToInteger()
+# define INTMETHOD int64_t
 #else
-# define INTMETHOD ToInt32()
+# define INTMETHOD int32_t
 #endif
 
   void * DTraceIntegerArgument::ArgumentValue(v8::Local<Value> value) {
     if (value->IsUndefined())
       return 0;
     else
-      return (void *)(long) value->INTMETHOD->Value();
+      return (void *)(long) Nan::To<INTMETHOD>(value).FromJust();
   }
 
   void DTraceIntegerArgument::FreeArgument(void *arg) {
@@ -33,7 +33,7 @@ namespace node {
     if (value->IsUndefined())
       return (void *) strdup("undefined");
 
-    String::Utf8Value str(value->ToString());
+    Nan::Utf8String str(value);
     return (void *) strdup(*str);
   }
 
@@ -51,7 +51,8 @@ namespace node {
     Nan::HandleScope scope;
     v8::Local<Context> context = Nan::GetCurrentContext();
     v8::Local<Object> global = context->Global();
-    v8::Local<Object> l_JSON = global->Get(Nan::New<String>("JSON").ToLocalChecked())->ToObject();
+    v8::Local<String> json = Nan::New<String>("JSON").ToLocalChecked();
+    v8::Local<Object> l_JSON = Nan::To<v8::Object>(global->Get(json)).ToLocalChecked();
     v8::Local<Function> l_JSON_stringify
       = v8::Local<Function>::Cast(l_JSON->Get(Nan::New<String>("stringify").ToLocalChecked()));
     JSON.Reset(l_JSON);
@@ -71,13 +72,14 @@ namespace node {
 
     v8::Local<Value> info[1];
     info[0] = value;
-    v8::Local<Value> j = Nan::New<Function>(JSON_stringify)->Call(
-          Nan::New<Object>(JSON), 1, info);
+    v8::Local<Function> cb = Nan::New<Function>(JSON_stringify);
+    v8::Local<Object> obj = Nan::New<Object>(JSON);
+    Local<Value> j = Nan::Call(cb, obj, 1, info).ToLocalChecked();
 
     if (*j == NULL)
       return (void *) strdup("{ \"error\": \"stringify failed\" }");
 
-    String::Utf8Value json(j->ToString());
+    Nan::Utf8String json(j);
     return (void *) strdup(*json);
   }
 

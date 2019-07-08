@@ -28,7 +28,7 @@ namespace node {
 
     Nan::SetPrototypeMethod(t, "fire", DTraceProbe::Fire);
 
-    target->Set(Nan::New<String>("DTraceProbe").ToLocalChecked(), t->GetFunction());
+    target->Set(Nan::New<String>("DTraceProbe").ToLocalChecked(), Nan::GetFunction(t).ToLocalChecked());
   }
 
   NAN_METHOD(DTraceProbe::New) {
@@ -68,7 +68,12 @@ namespace node {
     }
 
     Local<Function> cb = Local<Function>::Cast(argsinfo[fnidx]);
-    Local<Value> probe_args = cb->Call(this->handle(), cblen, cbargs);
+    Nan::MaybeLocal<Value> maybe = Nan::Call(cb, this->handle(), cblen, cbargs);
+    if (maybe.IsEmpty()) {
+      Nan::ThrowTypeError("Failed to invoke fire callback");
+      return Nan::Undefined();
+    }
+    Local<Value> probe_args = maybe.ToLocalChecked();
 
     delete [] cbargs;
 
