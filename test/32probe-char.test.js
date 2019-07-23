@@ -9,15 +9,19 @@ else {
     var dscript = 'testlibusdt*:::32probe{ printf("%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s\\n", copyinstr((uintptr_t)args[0]), copyinstr((uintptr_t)args[1]), copyinstr((uintptr_t)args[2]), copyinstr((uintptr_t)args[3]), copyinstr((uintptr_t)args[4]), copyinstr((uintptr_t)args[5]), copyinstr((uintptr_t)args[6]), copyinstr((uintptr_t)args[7]), copyinstr((uintptr_t)args[8]), copyinstr((uintptr_t)args[9]), copyinstr((uintptr_t)args[10]), copyinstr((uintptr_t)args[11]), copyinstr((uintptr_t)args[12]), copyinstr((uintptr_t)args[13]), copyinstr((uintptr_t)args[14]), copyinstr((uintptr_t)args[15]), copyinstr((uintptr_t)args[16]), copyinstr((uintptr_t)args[17]), copyinstr((uintptr_t)args[18]), copyinstr((uintptr_t)args[19]), copyinstr((uintptr_t)args[20]), copyinstr((uintptr_t)args[21]), copyinstr((uintptr_t)args[22]), copyinstr((uintptr_t)args[23]), copyinstr((uintptr_t)args[24]), copyinstr((uintptr_t)args[25]), copyinstr((uintptr_t)args[26]), copyinstr((uintptr_t)args[27]), copyinstr((uintptr_t)args[28]), copyinstr((uintptr_t)args[29]), copyinstr((uintptr_t)args[30]), copyinstr((uintptr_t)args[31])); }';
 }
 
+var d = require('../dtrace-provider');
+var provider = d.createDTraceProvider("testlibusdt");
+
 test(
     '32-arg probe',
     dtest(
         function() {
-            var d = require('../dtrace-provider');
-            // define this provider here, even though we won't fire it, so that we
-            // can start dtrace with an otherwise unstable set of probes - -Z
-            // won't work here.
-            var provider = d.createDTraceProvider("testlibusdt");
+            /*
+             * We define the probe here, even though we won't fire it. We do
+             * this because we index into the args[] array in our D script, and
+             * DTrace wants to verify the types of the probe arguments, which
+             * means -Z won't work here.
+             */
             var p = provider.addProbe(
                 "32probe",
                 "char *", "char *", "char *", "char *", "char *", "char *", "char *", "char *",
@@ -44,6 +48,8 @@ test(
                 t.equal(traced[i], letters[i],
                         format('arg%d of a 32-arg probe firing should be %s', i, letters[i]));
             }
+
+            provider.disable();
         }
     )
 );

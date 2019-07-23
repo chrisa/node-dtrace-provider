@@ -2,15 +2,19 @@ var test = require('tap').test;
 var format = require('util').format;
 var dtest = require('./dtrace-test').dtraceTest;
 
+var d = require('../dtrace-provider');
+var provider = d.createDTraceProvider("testlibusdt");
+
 test(
     '32-arg probe',
     dtest(
         function() {
-            var d = require('../dtrace-provider');
-            // define this provider here, even though we won't fire it, so that we
-            // can start dtrace with an otherwise unstable set of probes - -Z
-            // won't work here.
-            var provider = d.createDTraceProvider("testlibusdt");
+            /*
+             * We define the probe here, even though we won't fire it. We do
+             * this because we index into the args[] array in our D script, and
+             * DTrace wants to verify the types of the probe arguments, which
+             * means -Z won't work here.
+             */
             var probe = provider.addProbe("32probe",
                                           "int", "int", "int", "int", "int", "int", "int", "int",
                                           "int", "int", "int", "int", "int", "int", "int", "int",
@@ -35,6 +39,8 @@ test(
                             format('arg%d of a %d-arg probe firing should be %d', n - 1, i, n));
                 });
             }
+
+            provider.disable();
         }
     )
 );
