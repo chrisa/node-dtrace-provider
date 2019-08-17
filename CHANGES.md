@@ -3,6 +3,10 @@ dtrace-provider - Changes
 
 ## HISTORY
 
+ * 0.8.8:
+   Known support for v0.10.48, v0.12.16, v4.8.1, v6.17.0, v7.5.0, v8.16.0,
+   v9.3.0, v10.16.0, v12.7.0 (#125)
+
  * 0.8.7:
    Known support for v0.10.48, v0.12.16, v4.6.0, v7.5.0, v8.9.4, v10.3.0 (#119)
    Don't crash when attempting to fire unknown probes (#120)
