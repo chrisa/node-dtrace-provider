@@ -1,7 +1,7 @@
 {
-  "name": "dtrace-provider",
+  "name": "dtrace-provider-new",
   "version": "0.8.8",
-  "description": "Native DTrace providers for node.js applications",
+  "description": "Native DTrace providers for node.js applications with build directory fixed",
   "keywords": [
     "dtrace",
     "usdt"
@@ -9,12 +9,12 @@
   "homepage": "https://github.com/chrisa/node-dtrace-provider#readme",
   "license": "BSD-2-Clause",
   "author": {
-    "name": "Chris Andrews",
-    "email": "chris@nodnol.org"
+    "name": "Mukul Kumar",
+    "email": "mukulk133@gmail.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/chrisa/node-dtrace-provider.git"
+    "url": "https://github.com/developerKumar/node-dtrace-provider"
   },
   "engines": {
     "node": ">=0.10"
