@@ -59,7 +59,7 @@ buildUSDT() {
     fi
 
     # Build libusdt.
-    $MAKE -C libusdt clean all
+    $MAKE -e -C libusdt clean all
 }
 
 buildNDTP() {
