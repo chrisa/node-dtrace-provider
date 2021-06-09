@@ -8,6 +8,10 @@
   ],
   "homepage": "https://github.com/chrisa/node-dtrace-provider#readme",
   "license": "BSD-2-Clause",
+  "cpu": [
+    "ia32",
+    "x64"
+  ],
   "author": {
     "name": "Chris Andrews",
     "email": "chris@nodnol.org"
